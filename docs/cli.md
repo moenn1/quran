@@ -1,8 +1,8 @@
 # QuranKit CLI
 
-QuranKit now includes an initial Typer-based CLI scaffold in `apps/cli` under the Python package name `qurankit`.
+QuranKit includes a Typer-based CLI in `apps/cli` under the Python package name `qurankit`.
 
-The current implementation focuses on configuration and backend selection so later reading, search, progress, and export commands can share one stable foundation.
+The current CLI covers configuration, Quran lookup, exact search, and textual-similarity search while keeping remote API mode and local SQLite mode behind one consistent command surface.
 
 ## Install For Local Development
 
@@ -16,6 +16,8 @@ The editable install exposes the `qurankit` command and the pytest dependencies 
 
 ## Current Commands
 
+### Configuration
+
 - `qurankit config show`
 - `qurankit config show --format json`
 - `qurankit config set mode remote`
@@ -23,6 +25,26 @@ The editable install exposes the `qurankit` command and the pytest dependencies 
 - `qurankit config set api-url http://localhost:8000`
 - `qurankit config set db-path ~/.local/share/qurankit/qurankit.sqlite3`
 - `qurankit config set translation en.sahih`
+
+### Quran Lookup
+
+- `qurankit surah 1`
+- `qurankit ayah 2:255`
+- `qurankit juz 30`
+- `qurankit random`
+
+### Search
+
+- `qurankit search mercy`
+- `qurankit search guide path --limit 10`
+- `qurankit semantic guide path`
+- `qurankit semantic steadfast mercy --limit 8`
+
+### Shared Output Controls
+
+- `--json`: return machine-readable JSON instead of formatted text
+- `--translation IDENTIFIER`: override the configured translation or text edition for one command
+- `--no-translation`: render or search Arabic text only for one command
 
 ## Configuration Storage
 
@@ -36,13 +58,46 @@ The editable install exposes the `qurankit` command and the pytest dependencies 
 
 ## Backend Modes
 
-- `remote`: use a QuranKit HTTP API base URL, defaulting to `http://localhost:8000`
-- `local`: use a local SQLite file path for future offline reading and search flows
+### Remote API Mode
 
-The local SQLite mode is intentionally described as a storage/backend choice only at this stage. The CLI does not yet ship the surah, ayah, search, progress, or export commands that will consume that database.
+`remote` mode uses the configured QuranKit HTTP base URL and expects versioned GET endpoints for:
+
+- `/api/v1/surahs/{surahNumber}`
+- `/api/v1/ayahs/{surah}:{ayah}`
+- `/api/v1/juzs/{juzNumber}`
+- `/api/v1/ayahs/random`
+- `/api/v1/search/exact?q=...&translation=...&limit=...`
+- `/api/v1/search/semantic?q=...&translation=...&limit=...`
+
+Responses should include Quran source attribution and selected translation attribution whenever Quran text is returned.
+
+### Local SQLite Mode
+
+`local` mode reads directly from a SQLite file path.
+
+Minimum tables:
+
+- `surahs`
+- `ayahs`
+
+Required when translation output or translation-aware search is enabled:
+
+- `editions`
+- `ayah_edition`
+
+If the local file is missing or those tables are absent, the CLI exits with a useful setup error instead of silently creating an empty database.
+
+## Output Conventions
+
+- `surah`, `ayah`, `juz`, and `random` show Arabic text first and translation second when enabled.
+- `search` reports exact matches only and labels where the query matched, such as Arabic text or the selected translation.
+- `semantic` reports related passages by textual similarity and includes an explicit guardrail that the results are not tafsir, fatwa, or religious rulings.
+- JSON payloads preserve attribution metadata so downstream scripts do not lose source context.
 
 ## Religious Safety And Privacy
 
-- Show source and translation attribution whenever Quran text or translations are added to command output.
-- Keep bookmarks, notes, and reading progress private by default when those commands land.
+- Show Quran text exactly as stored in the selected backend.
+- Show source and translation attribution whenever Quran text or translations are returned.
+- Keep exact search and semantic search distinct in both command names and output wording.
 - Describe semantic search as textual similarity only, never as tafsir, fatwa, or religious ruling.
+- Keep bookmarks, notes, and reading progress private by default when those commands land later.

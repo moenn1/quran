@@ -36,10 +36,10 @@ This repository is being bootstrapped.
 
 ## Current Foundation
 
-- `apps/cli` contains the initial Typer CLI scaffold with persisted config for remote API and local SQLite modes.
+- `apps/cli` contains the Typer CLI with persisted config plus `surah`, `ayah`, `juz`, `random`, `search`, and `semantic` commands for remote API and local SQLite modes.
 - `apps/web` contains the initial Next.js web app scaffold for QuranKit.
 - `docs/frontend-architecture.md` documents the Arabic-inspired UI direction, route structure, and frontend component boundaries.
-- `docs/cli.md` documents installation, config storage, and backend selection for the CLI scaffold.
+- `docs/cli.md` documents installation, config storage, lookup commands, exact search, semantic search, and backend expectations for the CLI.
 - `CHANGELOG.md` tracks repository changes across the repository foundation, CLI scaffold, and frontend architecture.
 
 ## Development
@@ -67,7 +67,7 @@ npm run build
 
 ## Repository Layout
 
-- `apps/cli`: Typer CLI package, config storage, backend selection, and CLI tests.
+- `apps/cli`: Typer CLI package, config storage, lookup/search commands, backend selection, and CLI tests.
 - `apps/web`: Next.js web app shell, pages, styling, and tests.
 - `docs/database.md`: Source evaluation, attribution plan, and normalization guidance for the upstream Quran data.
 - `docs/frontend-architecture.md`: Frontend direction, route map, and implementation boundaries.
