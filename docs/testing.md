@@ -19,6 +19,7 @@ QuranKit needs layered verification across repository quality, backend behavior,
 
 - Command tests should cover reading flows, exact search, semantic-search wording, bookmark management, note management, and export behavior.
 - Snapshot or golden tests are acceptable for stable text output as long as Quran text itself is not mutated by test fixtures.
+- The current CLI baseline lives in `apps/cli` and uses pytest coverage for config persistence, backend selection, and the initial `qurankit config` command surface.
 
 ## Frontend
 
@@ -48,4 +49,4 @@ QuranKit needs layered verification across repository quality, backend behavior,
 - `./scripts/run-e2e.sh`
 - `./scripts/smoke-compose.sh`
 
-These commands intentionally no-op until the corresponding codebases exist. Once API, CLI, web, data, or E2E suites land, the owning team should wire each script to the real test command rather than inventing a new entry point.
+Some commands intentionally no-op until their corresponding codebases exist. The CLI target now runs `pytest` in `apps/cli`, while the remaining placeholders should be replaced as their codebases land.

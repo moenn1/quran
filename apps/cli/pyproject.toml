@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "qurankit"
+version = "0.1.0"
+description = "Command-line interface for QuranKit"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "typer>=0.16,<1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8,<10",
+]
+
+[project.scripts]
+qurankit = "qurankit.app:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/qurankit"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

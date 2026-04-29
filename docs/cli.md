@@ -1,18 +1,48 @@
-# QuranKit CLI Notes
+# QuranKit CLI
 
-The production CLI is not implemented yet, but its release-quality expectations are defined now so contributors can build against a stable contract.
+QuranKit now includes an initial Typer-based CLI scaffold in `apps/cli` under the Python package name `qurankit`.
 
-## Expectations
+The current implementation focuses on configuration and backend selection so later reading, search, progress, and export commands can share one stable foundation.
 
-- Support respectful terminal reading, exact search, semantic-search access, bookmarks, notes, and reading progress.
-- Keep semantic-search wording descriptive and non-interpretive.
-- Default local state for bookmarks, notes, and reading progress to private storage.
-- Show source attribution whenever Quran text or translations are displayed from imported sources.
+## Install For Local Development
 
-## Documentation Before Release
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -e 'apps/cli[dev]'
+```
 
-- Installation instructions
-- Command reference
-- Configuration and data-storage paths
-- Privacy defaults and export behavior
-- Semantic-search limitations
+The editable install exposes the `qurankit` command and the pytest dependencies used by `./scripts/run-cli-tests.sh`.
+
+## Current Commands
+
+- `qurankit config show`
+- `qurankit config show --format json`
+- `qurankit config set mode remote`
+- `qurankit config set mode local`
+- `qurankit config set api-url http://localhost:8000`
+- `qurankit config set db-path ~/.local/share/qurankit/qurankit.sqlite3`
+- `qurankit config set translation en.sahih`
+
+## Configuration Storage
+
+- Config file path: `~/.config/qurankit/config.json`
+- Local data path default: `~/.local/share/qurankit/qurankit.sqlite3`
+- Config home override: `QURANKIT_CONFIG_HOME`
+- Data home override: `QURANKIT_DATA_HOME`
+- Direct config file override: `QURANKIT_CONFIG_FILE`
+
+`config show` prints the effective settings together with the currently selected backend summary.
+
+## Backend Modes
+
+- `remote`: use a QuranKit HTTP API base URL, defaulting to `http://localhost:8000`
+- `local`: use a local SQLite file path for future offline reading and search flows
+
+The local SQLite mode is intentionally described as a storage/backend choice only at this stage. The CLI does not yet ship the surah, ayah, search, progress, or export commands that will consume that database.
+
+## Religious Safety And Privacy
+
+- Show source and translation attribution whenever Quran text or translations are added to command output.
+- Keep bookmarks, notes, and reading progress private by default when those commands land.
+- Describe semantic search as textual similarity only, never as tafsir, fatwa, or religious ruling.
