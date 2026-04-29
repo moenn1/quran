@@ -14,6 +14,8 @@ python -m pip install -e 'apps/cli[dev]'
 
 The editable install exposes the `qurankit` command and the pytest dependencies used by `./scripts/run-cli-tests.sh`.
 
+The repository test entry point prefers `.venv/bin/python` when it exists so local CLI verification and GitHub Actions both run against an explicitly prepared Python environment.
+
 ## Current Commands
 
 - `qurankit config show`

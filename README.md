@@ -44,11 +44,21 @@ This repository is being bootstrapped.
 
 ## Development
 
-Install dependencies:
+Set up the Python tooling used by the CLI and repository Python checks:
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -e 'apps/cli[dev]'
+```
+
+Install JavaScript workspace dependencies:
 
 ```bash
 npm ci
 ```
+
+`./scripts/run-cli-tests.sh` prefers `.venv/bin/python` when it exists so local CLI checks use the same environment consistently.
 
 Run the web app:
 
@@ -63,6 +73,7 @@ npm test
 npm run lint
 npm run build
 ./scripts/run-cli-tests.sh
+./scripts/run-data-validation.sh
 ```
 
 ## Repository Layout

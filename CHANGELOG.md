@@ -17,3 +17,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - Added self-hosting bootstrap assets with Docker Compose, backend/frontend Dockerfiles, environment examples, and a smoke test that exercises the running stack.
 - Added release-quality and safety documentation for religious guardrails, privacy defaults, testing strategy, API expectations, CLI expectations, database source evaluation, and release readiness.
 - Added GitHub Actions and local scripts for documentation checks, linting, frontend quality checks, data validation, Docker validation, and release-readiness checks.
+
+### Fixed
+
+- Made CLI test automation reproducible in clean environments by installing `apps/cli[dev]` in GitHub Actions, updating `./scripts/run-cli-tests.sh` to use one Python interpreter consistently, and documenting the required local setup.

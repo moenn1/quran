@@ -17,13 +17,15 @@ Thank you for contributing to QuranKit.
    `git config user.name "Mohamed En-Nassibi"`
    `git config user.email "mohamed.enn2001@gmail.com"`
 3. Copy `.env.example` to `.env`.
-4. Create a local Python virtual environment when running data-validation tooling:
+4. Create a local Python virtual environment for CLI and data-validation tooling:
    `python3 -m venv .venv`
    `. .venv/bin/activate`
-   `python -m pip install pytest`
+   `python -m pip install -e 'apps/cli[dev]'`
 5. Install JavaScript workspace dependencies with `npm ci` when frontend code is present.
 6. Start the bootstrap stack with `docker compose up --build`.
 7. Run `./scripts/release-readiness.sh` before pushing changes that affect repository quality, docs, Docker, CI, or data validation.
+
+`./scripts/run-cli-tests.sh` prefers `.venv/bin/python` when it exists, so keep the CLI development dependencies installed in that environment for local verification.
 
 ## Workflow
 
