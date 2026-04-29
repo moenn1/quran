@@ -33,3 +33,63 @@ The initial data foundation should evaluate and document the open-source `Abdull
 ## Development Status
 
 This repository is being bootstrapped.
+
+## Current Foundation
+
+- `apps/web` contains the initial Next.js web app scaffold for QuranKit.
+- `docs/frontend-architecture.md` documents the Arabic-inspired UI direction, route structure, and frontend component boundaries.
+- `CHANGELOG.md` tracks repository changes starting with the frontend architecture foundation.
+
+## Development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the web app:
+
+```bash
+npm run dev:web
+```
+
+Run checks:
+
+```bash
+npm test
+npm run lint
+npm run build
+```
+
+## Repository Layout
+
+- `apps/web`: Next.js web app shell, pages, styling, and tests.
+- `docs/frontend-architecture.md`: Frontend direction, route map, and implementation boundaries.
+
+## Repository Foundation
+
+The repository now includes a release-quality bootstrap for self-hosting, documentation, and CI so the API, CLI, web, and data work can land on a stable base.
+
+- `compose.yaml` provisions PostgreSQL, a bootstrap API container, a bootstrap web container, and an optional Qdrant profile for semantic-search experiments.
+- `.github/workflows/quality.yml` and `.github/workflows/release-readiness.yml` run documentation, safety, Docker, and bootstrap test checks.
+- `./scripts/smoke-compose.sh` proves the bootstrap stack can start, answer health checks, and shut down cleanly.
+- `docs/` tracks self-hosting, testing strategy, religious safety, API expectations, CLI expectations, and release readiness.
+
+## Quick Start
+
+1. Copy `.env.example` to `.env`.
+2. Run `docker compose up --build`.
+3. Visit `http://localhost:3000` for the bootstrap web UI and `http://localhost:8000/health` for the bootstrap API health check.
+4. Run `./scripts/release-readiness.sh` before pushing repository-quality changes.
+
+## Documentation
+
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [CHANGELOG.md](CHANGELOG.md)
+- [docs/self-hosting.md](docs/self-hosting.md)
+- [docs/testing.md](docs/testing.md)
+- [docs/religious-safety.md](docs/religious-safety.md)
+- [docs/api.md](docs/api.md)
+- [docs/cli.md](docs/cli.md)
+- [docs/release-readiness.md](docs/release-readiness.md)

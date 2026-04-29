@@ -1,0 +1,16 @@
+{
+  "name": "qurankit",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace @qurankit/web",
+    "build:web": "npm run build --workspace @qurankit/web",
+    "lint:web": "npm run lint --workspace @qurankit/web",
+    "test:web": "npm run test --workspace @qurankit/web",
+    "build": "npm run build:web",
+    "lint": "npm run lint:web",
+    "test": "npm run test:web"
+  }
+}

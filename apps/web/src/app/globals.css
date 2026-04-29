@@ -1,0 +1,604 @@
+@import "@fontsource/newsreader/400.css";
+@import "@fontsource/newsreader/500.css";
+@import "@fontsource/newsreader/600.css";
+@import "@fontsource/newsreader/700.css";
+@import "@fontsource/noto-naskh-arabic/400.css";
+@import "@fontsource/noto-naskh-arabic/500.css";
+@import "@fontsource/noto-naskh-arabic/600.css";
+@import "@fontsource/noto-naskh-arabic/700.css";
+
+:root {
+  color-scheme: light;
+  --bg: #f3e9d7;
+  --bg-deep: #e5d3b6;
+  --surface: rgba(249, 243, 231, 0.92);
+  --surface-strong: rgba(255, 251, 244, 0.88);
+  --ink: #24190f;
+  --muted: #645646;
+  --line: rgba(113, 85, 46, 0.24);
+  --line-strong: rgba(113, 85, 46, 0.45);
+  --accent: #1d5f5a;
+  --accent-soft: rgba(29, 95, 90, 0.12);
+  --accent-strong: #123d39;
+  --warm: #8b6a3f;
+  --warm-soft: rgba(139, 106, 63, 0.12);
+  --shadow: 0 24px 60px rgba(56, 39, 18, 0.08);
+  --radius-lg: 1.4rem;
+  --radius-md: 1rem;
+  --max-width: 78rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background:
+    radial-gradient(circle at top left, rgba(29, 95, 90, 0.18), transparent 34%),
+    radial-gradient(circle at top right, rgba(139, 106, 63, 0.18), transparent 32%),
+    linear-gradient(180deg, #f7f0e3 0%, var(--bg) 45%, #ede0c7 100%);
+  color: var(--ink);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Newsreader", Georgia, serif;
+  color: inherit;
+  background: transparent;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 0, rgba(113, 85, 46, 0.04) 50%, transparent 100%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 46px,
+      rgba(113, 85, 46, 0.028) 46px,
+      rgba(113, 85, 46, 0.028) 47px
+    );
+  opacity: 0.5;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: rgba(29, 95, 90, 0.24);
+}
+
+:focus-visible {
+  outline: 3px solid rgba(29, 95, 90, 0.55);
+  outline-offset: 3px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  z-index: 20;
+  padding: 0.75rem 1rem;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  transform: translateY(-200%);
+  transition: transform 180ms ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.app-shell {
+  position: relative;
+  z-index: 1;
+  padding: 1rem;
+}
+
+.shell-frame {
+  width: min(100%, var(--max-width));
+  margin: 0 auto;
+}
+
+.shell-header,
+.page-hero,
+.reader-preview,
+.semantic-notice,
+.surface-card,
+.site-footer {
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.shell-header,
+.page-hero,
+.reader-preview,
+.semantic-notice,
+.site-footer {
+  background: var(--surface);
+}
+
+.shell-header {
+  position: sticky;
+  top: 1rem;
+  z-index: 10;
+  border-radius: calc(var(--radius-lg) + 0.2rem);
+  padding: 1rem 1.1rem 1.1rem;
+  backdrop-filter: blur(12px);
+}
+
+.shell-header::before,
+.page-hero::before,
+.reader-preview::before,
+.semantic-notice::before,
+.surface-card::before,
+.site-footer::before {
+  content: "";
+  display: block;
+  height: 0.28rem;
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0,
+      rgba(139, 106, 63, 0.12) 8%,
+      rgba(29, 95, 90, 0.42) 50%,
+      rgba(139, 106, 63, 0.12) 92%,
+      transparent 100%
+    );
+}
+
+.shell-header__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin-top: 0.9rem;
+}
+
+.brand-block {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.brand-block__eyebrow,
+.section-label,
+.surah-chip {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+}
+
+.brand-block__title {
+  width: fit-content;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.brand-block__copy,
+.page-hero__description,
+.section-description,
+.semantic-notice__list,
+.surface-card__description,
+.surface-card__list,
+.reader-preview__description,
+.reader-preview__surah-meta,
+.reader-preview__note,
+.attribution,
+.site-footer p {
+  color: var(--muted);
+}
+
+.brand-block__copy {
+  margin: 0;
+  max-width: 44rem;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.seal {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 4.4rem;
+  aspect-ratio: 1;
+  border: 1px solid var(--line-strong);
+  border-radius: 1.3rem;
+  background:
+    radial-gradient(circle, rgba(29, 95, 90, 0.08), transparent 58%),
+    linear-gradient(135deg, rgba(139, 106, 63, 0.08), transparent 70%);
+}
+
+.seal span {
+  grid-area: 1 / 1;
+  display: block;
+  border: 1px solid rgba(113, 85, 46, 0.36);
+  border-radius: 0.7rem;
+}
+
+.seal span:nth-child(1) {
+  width: 2.6rem;
+  height: 2.6rem;
+  transform: rotate(45deg);
+}
+
+.seal span:nth-child(2) {
+  width: 1.7rem;
+  height: 1.7rem;
+}
+
+.seal span:nth-child(3) {
+  width: 0.8rem;
+  height: 0.8rem;
+  background: rgba(29, 95, 90, 0.16);
+}
+
+.nav {
+  display: flex;
+  gap: 0.65rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.nav__link {
+  flex-shrink: 0;
+  padding: 0.7rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  color: var(--muted);
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.nav__link:hover {
+  border-color: var(--line);
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--ink);
+}
+
+.nav__link--active {
+  border-color: rgba(29, 95, 90, 0.24);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.page-stack {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1.25rem;
+}
+
+.page-hero,
+.reader-preview,
+.semantic-notice,
+.site-footer {
+  border-radius: calc(var(--radius-lg) + 0.2rem);
+  padding: 1.2rem;
+}
+
+.page-hero__title,
+.section-title {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.02;
+}
+
+.page-hero__title {
+  max-width: 16ch;
+  margin-top: 0.45rem;
+  font-size: clamp(2.4rem, 6vw, 4.6rem);
+}
+
+.page-hero__description {
+  margin: 0.9rem 0 0;
+  max-width: 48rem;
+  font-size: 1.15rem;
+  line-height: 1.58;
+}
+
+.pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  padding: 0;
+  margin: 1.25rem 0 0;
+  list-style: none;
+}
+
+.pill {
+  padding: 0.58rem 0.85rem;
+  border: 1px solid rgba(29, 95, 90, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--accent-strong);
+}
+
+.section-block {
+  display: grid;
+  gap: 1rem;
+}
+
+.section-copy {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.section-title {
+  font-size: clamp(1.7rem, 4vw, 2.6rem);
+}
+
+.section-description {
+  margin: 0;
+  max-width: 44rem;
+  line-height: 1.6;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+
+.surface-card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  min-height: 100%;
+  padding: 1.05rem;
+  border-radius: var(--radius-lg);
+  background: var(--surface-strong);
+}
+
+.surface-card--accent {
+  background:
+    linear-gradient(160deg, rgba(29, 95, 90, 0.1), rgba(29, 95, 90, 0.02)),
+    var(--surface-strong);
+}
+
+.surface-card--warm {
+  background:
+    linear-gradient(160deg, rgba(139, 106, 63, 0.12), rgba(139, 106, 63, 0.02)),
+    var(--surface-strong);
+}
+
+.surface-card__body {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.surface-card__title {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.15;
+}
+
+.surface-card__description,
+.surface-card__footer,
+.surface-card__list {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.surface-card__list {
+  padding-left: 1.15rem;
+}
+
+.surface-card__link {
+  width: fit-content;
+  margin-top: auto;
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.reader-preview {
+  display: grid;
+  gap: 1rem;
+}
+
+.reader-preview__header {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.reader-preview__description {
+  margin: 0;
+  max-width: 48rem;
+  line-height: 1.6;
+}
+
+.reader-preview__surah {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.85rem 1.1rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(113, 85, 46, 0.18);
+  background: rgba(255, 255, 255, 0.44);
+}
+
+.reader-preview__surah-title {
+  margin: 0.3rem 0 0;
+  font-size: 1.85rem;
+}
+
+.reader-preview__surah-arabic {
+  margin: 0;
+  margin-left: auto;
+  font-family: "Noto Naskh Arabic", serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.reader-preview__surah-meta {
+  margin: 0;
+}
+
+.ayah-list {
+  display: grid;
+  gap: 0.9rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.ayah-card {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(113, 85, 46, 0.18);
+  background: rgba(255, 255, 255, 0.52);
+}
+
+.ayah-card__number {
+  width: fit-content;
+  padding: 0.36rem 0.58rem;
+  border-radius: 999px;
+  background: var(--warm-soft);
+  color: var(--warm);
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ayah-card__arabic {
+  margin: 0;
+  font-family: "Noto Naskh Arabic", serif;
+  font-size: clamp(1.8rem, 5vw, 2.6rem);
+  line-height: 1.92;
+  color: var(--ink);
+  text-align: right;
+}
+
+.ayah-card__translation {
+  margin: 0;
+  max-width: 42rem;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.reader-preview__footer {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.attribution,
+.reader-preview__note,
+.site-footer p {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.semantic-notice {
+  display: grid;
+  gap: 0.6rem;
+  background:
+    linear-gradient(160deg, rgba(29, 95, 90, 0.08), rgba(255, 255, 255, 0.65)),
+    var(--surface);
+}
+
+.semantic-notice__list {
+  padding-left: 1.15rem;
+  margin: 0.15rem 0 0;
+  line-height: 1.6;
+}
+
+.site-footer {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.25rem 0 2rem;
+}
+
+@media (min-width: 56rem) {
+  .page-hero,
+  .reader-preview,
+  .semantic-notice,
+  .site-footer {
+    padding: 1.5rem;
+  }
+
+  .page-stack {
+    gap: 1.5rem;
+  }
+
+  .section-block {
+    gap: 1.15rem;
+  }
+}
+
+@media (max-width: 44rem) {
+  .app-shell {
+    padding: 0.8rem;
+  }
+
+  .shell-header {
+    top: 0.8rem;
+    padding: 0.9rem;
+  }
+
+  .shell-header__top {
+    flex-direction: column;
+  }
+
+  .reader-preview__surah {
+    align-items: flex-start;
+  }
+
+  .reader-preview__surah-arabic {
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .page-hero,
+  .reader-preview,
+  .semantic-notice,
+  .surface-card {
+    animation: rise-in 520ms ease both;
+  }
+
+  .surface-card:hover,
+  .nav__link:hover {
+    transform: translateY(-1px);
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
