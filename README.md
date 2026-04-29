@@ -36,9 +36,13 @@ This repository is being bootstrapped.
 
 ## Current Foundation
 
+- `apps/api` and `apps/cli` are tracked as placeholders for the planned FastAPI and Typer applications.
 - `apps/web` contains the initial Next.js web app scaffold for QuranKit.
+- `packages/database`, `packages/embeddings`, and `packages/shared` reserve shared monorepo boundaries for schema, vector search, and cross-surface contracts.
+- `data/` is reserved for reproducible local data artifacts and validation outputs.
+- `docs/architecture.md` captures the recommended FastAPI, Typer, Next.js, PostgreSQL, and vector-search direction.
 - `docs/frontend-architecture.md` documents the Arabic-inspired UI direction, route structure, and frontend component boundaries.
-- `CHANGELOG.md` tracks repository changes starting with the frontend architecture foundation.
+- `CHANGELOG.md` tracks repository changes across the monorepo bootstrap, release-quality baseline, and frontend architecture foundation.
 
 ## Development
 
@@ -64,7 +68,14 @@ npm run build
 
 ## Repository Layout
 
+- `apps/api`: Placeholder for the FastAPI application.
+- `apps/cli`: Placeholder for the Typer CLI application.
 - `apps/web`: Next.js web app shell, pages, styling, and tests.
+- `packages/database`: Placeholder for schema, migration, and validation tooling.
+- `packages/embeddings`: Placeholder for optional vector-search integrations.
+- `packages/shared`: Placeholder for shared contracts and utilities.
+- `data/`: Local or generated artifacts that are safe to keep in the repository.
+- `docs/architecture.md`: Recommended stack direction and monorepo boundaries.
 - `docs/database.md`: Source evaluation, attribution plan, and normalization guidance for the upstream Quran data.
 - `docs/frontend-architecture.md`: Frontend direction, route map, and implementation boundaries.
 
@@ -91,6 +102,7 @@ The repository now includes a release-quality bootstrap for self-hosting, docume
 - [docs/self-hosting.md](docs/self-hosting.md)
 - [docs/testing.md](docs/testing.md)
 - [docs/religious-safety.md](docs/religious-safety.md)
+- [docs/architecture.md](docs/architecture.md)
 - [docs/database.md](docs/database.md)
 - [docs/frontend-architecture.md](docs/frontend-architecture.md)
 - [docs/api.md](docs/api.md)

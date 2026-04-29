@@ -87,6 +87,9 @@ jobs:
       - name: Run backend test entry point
         run: ./scripts/run-backend-tests.sh
 
+      - name: Run repository bootstrap tests
+        run: PYTHONPATH="${PWD}${PYTHONPATH:+:${PYTHONPATH}}" pytest tests/test_repository_bootstrap.py
+
       - name: Run frontend test entry point
         run: ./scripts/run-frontend-tests.sh
 

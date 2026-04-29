@@ -6,6 +6,7 @@ QuranKit needs layered verification across repository quality, backend behavior,
 
 - `./scripts/lint-repo.sh` checks shell syntax and bootstrap Python syntax.
 - `./scripts/check-docs.sh` enforces required files and repository guarantees such as the maintainer note, semantic-search disclaimer, privacy defaults, and release docs.
+- `tests/test_repository_bootstrap.py` checks that the tracked monorepo placeholder paths and architecture note remain present.
 - `docker compose -f compose.yaml config` validates the self-hosting configuration.
 - `./scripts/smoke-compose.sh` boots the bootstrap stack under an isolated Compose project, checks the API and web endpoints, and shuts the stack down.
 

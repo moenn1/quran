@@ -9,6 +9,15 @@ is_tracked() {
 ./scripts/lint-repo.sh
 ./scripts/check-docs.sh
 
+if [ -f tests/test_repository_bootstrap.py ] && is_tracked tests/test_repository_bootstrap.py; then
+  if ! command -v pytest >/dev/null 2>&1; then
+    echo "Repository bootstrap tests exist, but pytest is not installed." >&2
+    exit 1
+  fi
+
+  PYTHONPATH="${PWD}${PYTHONPATH:+:${PYTHONPATH}}" pytest tests/test_repository_bootstrap.py
+fi
+
 if [ -f package.json ] && is_tracked package.json; then
   if ! command -v npm >/dev/null 2>&1; then
     echo "Tracked JavaScript workspace detected, but npm is not installed." >&2

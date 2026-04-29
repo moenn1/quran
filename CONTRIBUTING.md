@@ -29,6 +29,7 @@ Thank you for contributing to QuranKit.
 
 - Create a focused branch from `main`.
 - Keep commits small and repository-facing language centered on QuranKit.
+- Extend the existing `apps/*`, `packages/*`, `data/`, `docs/`, and `scripts/` layout instead of creating ad hoc top-level folders.
 - Add or update the tests that cover the behavior you changed when practical.
 - Update `CHANGELOG.md` and relevant documentation when behavior, workflows, or guarantees change.
 - Do not commit secrets, local `.env` files, or private data.
@@ -51,6 +52,7 @@ Some scripts intentionally no-op until their corresponding application surfaces 
 ## Documentation Expectations
 
 - Keep `README.md` coherent with the current project state and preserve the maintainer note.
+- Update `docs/architecture.md` when monorepo boundaries or stack direction change.
 - Update `docs/self-hosting.md` when Compose services, container assumptions, or environment variables change.
 - Update `docs/testing.md` when new test suites or verification rules are introduced.
 - Update `docs/religious-safety.md` whenever religious-safety, privacy, source-attribution, or UI-readability rules change.

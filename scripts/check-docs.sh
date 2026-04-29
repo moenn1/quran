@@ -25,10 +25,17 @@ for file in \
   CONTRIBUTING.md \
   CODE_OF_CONDUCT.md \
   LICENSE \
+  apps/api/README.md \
+  apps/cli/README.md \
+  packages/database/README.md \
+  packages/embeddings/README.md \
+  packages/shared/README.md \
+  data/README.md \
   compose.yaml \
   .env.example \
   .env.api.example \
   .env.web.example \
+  docs/architecture.md \
   docs/self-hosting.md \
   docs/testing.md \
   docs/religious-safety.md \
@@ -54,6 +61,11 @@ assert_text README.md "Semantic search results are related passages by textual s
 assert_text CHANGELOG.md "## [Unreleased]"
 assert_text CONTRIBUTING.md "git config user.name \"Mohamed En-Nassibi\""
 assert_text CONTRIBUTING.md "git config user.email \"mohamed.enn2001@gmail.com\""
+assert_text docs/architecture.md "FastAPI"
+assert_text docs/architecture.md "Typer"
+assert_text docs/architecture.md "Next.js"
+assert_text docs/architecture.md "PostgreSQL"
+assert_text docs/architecture.md "textual similarity only"
 assert_text docs/self-hosting.md "qdrant"
 assert_text docs/religious-safety.md "Do not alter Quran text."
 assert_text docs/religious-safety.md "Semantic search is textual similarity, not tafsir, fatwa, or religious ruling."
