@@ -33,3 +33,33 @@ The initial data foundation should evaluate and document the open-source `Abdull
 ## Development Status
 
 This repository is being bootstrapped.
+
+## Backend Development
+
+The first QuranKit API scaffold now lives in `apps/api`.
+
+Run it locally:
+
+```bash
+cd apps/api
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+uvicorn qurankit_api.main:app --reload
+```
+
+Key endpoints:
+
+- `GET /`
+- `GET /api/v1/health`
+- `GET /docs`
+- `GET /openapi.json`
+
+Run backend tests from the repository root:
+
+```bash
+./scripts/run-backend-tests.sh
+```
+
+Additional backend notes live in [docs/api.md](docs/api.md) and [docs/testing.md](docs/testing.md).

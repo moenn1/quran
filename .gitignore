@@ -1,0 +1,8 @@
+.DS_Store
+__pycache__/
+.coverage
+.mypy_cache/
+.pytest_cache/
+*.py[cod]
+*.egg-info/
+apps/api/.venv/
