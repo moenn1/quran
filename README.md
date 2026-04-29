@@ -45,7 +45,7 @@ This repository is being bootstrapped.
 Install dependencies:
 
 ```bash
-npm install
+npm ci
 ```
 
 Run the web app:
@@ -65,6 +65,7 @@ npm run build
 ## Repository Layout
 
 - `apps/web`: Next.js web app shell, pages, styling, and tests.
+- `docs/database.md`: Source evaluation, attribution plan, and normalization guidance for the upstream Quran data.
 - `docs/frontend-architecture.md`: Frontend direction, route map, and implementation boundaries.
 
 ## Repository Foundation
@@ -90,6 +91,8 @@ The repository now includes a release-quality bootstrap for self-hosting, docume
 - [docs/self-hosting.md](docs/self-hosting.md)
 - [docs/testing.md](docs/testing.md)
 - [docs/religious-safety.md](docs/religious-safety.md)
+- [docs/database.md](docs/database.md)
+- [docs/frontend-architecture.md](docs/frontend-architecture.md)
 - [docs/api.md](docs/api.md)
 - [docs/cli.md](docs/cli.md)
 - [docs/release-readiness.md](docs/release-readiness.md)

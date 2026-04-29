@@ -1,0 +1,65 @@
+name: qurankit
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-qurankit}
+      POSTGRES_USER: ${POSTGRES_USER:-qurankit}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-qurankit}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/api.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      QURANKIT_APP_NAME: QuranKit API Bootstrap
+      QURANKIT_BIND_HOST: 0.0.0.0
+      QURANKIT_BIND_PORT: 8000
+      QURANKIT_DATABASE_URL: postgresql://${POSTGRES_USER:-qurankit}:${POSTGRES_PASSWORD:-qurankit}@db:5432/${POSTGRES_DB:-qurankit}
+      QURANKIT_SOURCE_ATTRIBUTION_REQUIRED: ${QURANKIT_SOURCE_ATTRIBUTION_REQUIRED:-true}
+      QURANKIT_PRIVACY_MODE: ${QURANKIT_PRIVACY_MODE:-private-by-default}
+      QURANKIT_SEMANTIC_SEARCH_DISCLAIMER: Semantic search is textual similarity, not tafsir, fatwa, or religious ruling.
+    ports:
+      - "${API_PORT:-8000}:8000"
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/web.Dockerfile
+      args:
+        API_BASE_URL: http://localhost:${API_PORT:-8000}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "${WEB_PORT:-3000}:80"
+
+  qdrant:
+    image: qdrant/qdrant:v1.13.6
+    restart: unless-stopped
+    profiles:
+      - semantic-search
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+volumes:
+  postgres-data:
+  qdrant-data:

@@ -4,6 +4,8 @@
 .env.web
 .env.local
 .env.*.local
+.next/
+.venv/
 __pycache__/
 .pytest_cache/
 node_modules/
