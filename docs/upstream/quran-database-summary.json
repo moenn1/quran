@@ -1,0 +1,346 @@
+{
+  "source_dump": {
+    "path": "/tmp/qurankit-upstream-quran-database/quran.sql",
+    "bytes": 196134785,
+    "generation_time": "Jun 07, 2018 at 10:43 AM",
+    "server_version": "5.7.22",
+    "php_version": "7.1.18",
+    "database_name": "quran"
+  },
+  "tables": {
+    "ayahs": {
+      "columns": [
+        "id",
+        "number",
+        "text",
+        "number_in_surah",
+        "page",
+        "surah_id",
+        "hizb_id",
+        "juz_id",
+        "sajda",
+        "created_at",
+        "updated_at"
+      ],
+      "rows": 6236
+    },
+    "ayah_edition": {
+      "columns": [
+        "id",
+        "ayah_id",
+        "edition_id",
+        "data",
+        "is_audio",
+        "created_at",
+        "updated_at"
+      ],
+      "rows": 835624
+    },
+    "editions": {
+      "columns": [
+        "id",
+        "identifier",
+        "language",
+        "name",
+        "englishName",
+        "format",
+        "type",
+        "created_at",
+        "updated_at"
+      ],
+      "rows": 134
+    },
+    "hizbs": {
+      "columns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "rows": 0
+    },
+    "juzs": {
+      "columns": [
+        "id",
+        "created_at",
+        "updated_at"
+      ],
+      "rows": 0
+    },
+    "migrations": {
+      "columns": [
+        "id",
+        "migration",
+        "batch"
+      ],
+      "rows": 8
+    },
+    "password_resets": {
+      "columns": [
+        "email",
+        "token",
+        "created_at"
+      ],
+      "rows": 0
+    },
+    "surahs": {
+      "columns": [
+        "id",
+        "number",
+        "name_ar",
+        "name_en",
+        "name_en_translation",
+        "type",
+        "created_at",
+        "updated_at"
+      ],
+      "rows": 114
+    },
+    "users": {
+      "columns": [
+        "id",
+        "name",
+        "email",
+        "password",
+        "remember_token",
+        "created_at",
+        "updated_at"
+      ],
+      "rows": 0
+    }
+  },
+  "content_counts": {
+    "surahs": 114,
+    "ayahs": 6236,
+    "editions": 134,
+    "ayah_edition": 835624
+  },
+  "ranges": {
+    "page": [
+      1,
+      604
+    ],
+    "juz_id": [
+      1,
+      30
+    ],
+    "hizb_id": [
+      1,
+      240
+    ],
+    "sajda_count": 15
+  },
+  "checks": {
+    "surah_count_matches_ayah_coverage": true,
+    "global_ayah_ids_sequential": true,
+    "global_ayah_numbers_sequential": true,
+    "number_in_surah_sequential": true,
+    "edition_coverage_complete": true,
+    "utf8_bom_on_first_ayah": true,
+    "basmala_prefixed_first_ayahs_excluding_1_9": {
+      "count": 110,
+      "sample_surah_ids": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10,
+        11,
+        12,
+        13,
+        14
+      ]
+    },
+    "variant_basmala_like_first_ayahs_excluding_1_9": {
+      "count": 2,
+      "sample": [
+        {
+          "surah_id": 95,
+          "text": "بِّسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ وَٱلتِّينِ وَٱلزَّيْتُونِ"
+        },
+        {
+          "surah_id": 97,
+          "text": "بِّسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ إِنَّآ أَنزَلْنَٰهُ فِى لَيْلَةِ ٱلْقَدْرِ"
+        }
+      ]
+    },
+    "empty_juzs_table": true,
+    "empty_hizbs_table": true
+  },
+  "editions": {
+    "by_language": {
+      "ar": 32,
+      "az": 2,
+      "bg": 1,
+      "bn": 1,
+      "bs": 2,
+      "cs": 2,
+      "de": 4,
+      "dv": 1,
+      "en": 15,
+      "es": 2,
+      "fa": 11,
+      "fr": 2,
+      "ha": 1,
+      "hi": 2,
+      "id": 2,
+      "it": 1,
+      "ja": 1,
+      "ko": 1,
+      "ku": 1,
+      "ml": 1,
+      "ms": 1,
+      "nl": 1,
+      "no": 1,
+      "pl": 1,
+      "pt": 1,
+      "ro": 1,
+      "ru": 7,
+      "sd": 1,
+      "si": 1,
+      "so": 1,
+      "sq": 3,
+      "sv": 1,
+      "sw": 1,
+      "ta": 1,
+      "tg": 1,
+      "th": 1,
+      "tr": 10,
+      "tt": 1,
+      "ug": 1,
+      "ur": 8,
+      "uz": 1,
+      "zh": 4
+    },
+    "by_format": {
+      "audio": 24,
+      "text": 110
+    },
+    "by_type": {
+      "quran": 10,
+      "tafsir": 2,
+      "translation": 100,
+      "transliteration": 2,
+      "versebyverse": 20
+    },
+    "complete_edition_count": 134,
+    "incomplete_editions": [],
+    "sample": [
+      {
+        "edition_id": 1,
+        "identifier": "ar.muyassar",
+        "language": "ar",
+        "format": "text",
+        "type": "tafsir",
+        "ayah_rows": 6236
+      },
+      {
+        "edition_id": 2,
+        "identifier": "az.mammadaliyev",
+        "language": "az",
+        "format": "text",
+        "type": "translation",
+        "ayah_rows": 6236
+      },
+      {
+        "edition_id": 3,
+        "identifier": "az.musayev",
+        "language": "az",
+        "format": "text",
+        "type": "translation",
+        "ayah_rows": 6236
+      },
+      {
+        "edition_id": 4,
+        "identifier": "bn.bengali",
+        "language": "bn",
+        "format": "text",
+        "type": "translation",
+        "ayah_rows": 6236
+      },
+      {
+        "edition_id": 5,
+        "identifier": "cs.hrbek",
+        "language": "cs",
+        "format": "text",
+        "type": "translation",
+        "ayah_rows": 6236
+      },
+      {
+        "edition_id": 6,
+        "identifier": "cs.nykl",
+        "language": "cs",
+        "format": "text",
+        "type": "translation",
+        "ayah_rows": 6236
+      },
+      {
+        "edition_id": 7,
+        "identifier": "de.aburida",
+        "language": "de",
+        "format": "text",
+        "type": "translation",
+        "ayah_rows": 6236
+      },
+      {
+        "edition_id": 8,
+        "identifier": "de.bubenheim",
+        "language": "de",
+        "format": "text",
+        "type": "translation",
+        "ayah_rows": 6236
+      },
+      {
+        "edition_id": 9,
+        "identifier": "de.khoury",
+        "language": "de",
+        "format": "text",
+        "type": "translation",
+        "ayah_rows": 6236
+      },
+      {
+        "edition_id": 10,
+        "identifier": "de.zaidan",
+        "language": "de",
+        "format": "text",
+        "type": "translation",
+        "ayah_rows": 6236
+      },
+      {
+        "edition_id": 11,
+        "identifier": "dv.divehi",
+        "language": "dv",
+        "format": "text",
+        "type": "translation",
+        "ayah_rows": 6236
+      },
+      {
+        "edition_id": 12,
+        "identifier": "en.ahmedali",
+        "language": "en",
+        "format": "text",
+        "type": "translation",
+        "ayah_rows": 6236
+      }
+    ]
+  },
+  "surah_samples": {
+    "1": "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
+    "2": "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ الٓمٓ",
+    "3": "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ الٓمٓ",
+    "9": "بَرَآءَةٌۭ مِّنَ ٱللَّهِ وَرَسُولِهِۦٓ إِلَى ٱلَّذِينَ عَٰهَدتُّم مِّنَ ٱلْمُشْرِكِينَ",
+    "27": "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ طسٓ ۚ تِلْكَ ءَايَٰتُ ٱلْقُرْءَانِ وَكِتَابٍۢ مُّبِينٍ",
+    "114": "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ"
+  },
+  "notes": [
+    "The SQL dump does not include the README's claimed addons table; the README schema names do not match the actual export.",
+    "Ayah rows carry juz_id values, but the juzs table is empty and cannot provide standalone range metadata.",
+    "Ayah rows carry hizb_id values, but the hizbs table is empty and cannot provide standalone range metadata.",
+    "The hizb_id range reaches 240, which suggests quarter-hizb granularity rather than a populated 60-row hizb table.",
+    "Surah 1 ayah 1 starts with a UTF-8 BOM character, so ingestion should preserve the raw source while handling the encoding marker explicitly.",
+    "Most first-ayah texts for surahs other than 1 and 9 are basmala-prefixed in the source dump, and a small number use a basmala-like variant, so QuranKit should treat that segmentation and spelling behavior as upstream data, not a local transformation.",
+    "Every edition currently has one ayah_edition row per ayah, which is a strong baseline for translation-integrity validation."
+  ]
+}
