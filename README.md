@@ -62,4 +62,20 @@ Run backend tests from the repository root:
 ./scripts/run-backend-tests.sh
 ```
 
-Additional backend notes live in [docs/api.md](docs/api.md) and [docs/testing.md](docs/testing.md).
+Initialize the local database schema and source metadata:
+
+```bash
+./scripts/run-db-migrations.sh
+./scripts/seed-source-metadata.sh
+```
+
+If `QURANKIT_DATABASE_URL` is unset, both scripts default to `apps/api/.data/qurankit.db`.
+
+The current schema foundation includes:
+
+- source provenance tables for upstream release and artifact metadata
+- canonical `surahs`, `ayahs`, `translations`, and `ayah_translations` tables
+- private-by-default tables for reading sessions, progress, plans, bookmarks, and notes
+- semantic embedding metadata records that target either an ayah or a translation row
+
+Additional backend notes live in [docs/api.md](docs/api.md), [docs/database.md](docs/database.md), and [docs/testing.md](docs/testing.md).

@@ -196,3 +196,62 @@ Proceed with this source only if QuranKit:
 - treats translation and audio editions as separately reviewable assets
 - documents the basmala segmentation behavior
 - normalizes hizb metadata carefully instead of trusting the empty upstream tables
+
+## Implemented Schema Scaffold
+
+The current backend scaffold now includes the first normalized application schema in `apps/api` with Alembic migrations and SQLAlchemy models.
+
+### Source provenance tables
+
+- `source_releases` stores the evaluated upstream repository URL, commit SHA, retrieved artifact checksum, and raw dump metadata strings.
+- `source_files` stores per-artifact metadata such as the `quran.sql.zip` SHA-256 and artifact role.
+
+### Canonical Quran content tables
+
+- `surahs` stores canonical surah metadata keyed by `surah_number`.
+- `ayahs` stores canonical ayah rows keyed by `global_ayah_number` with `ayah_number`, `page_number`, `juz_number`, `hizb_number`, `rub_el_hizb_number`, and exact-source text checksums.
+- `translations` stores translation metadata, attribution fields, rights-review fields, and a public-exposure gate.
+- `ayah_translations` stores per-ayah translation text with upstream row provenance and exact-text checksums.
+
+Schema guardrails currently enforced in the database layer include:
+
+- `surah_number` range `1..114`
+- `global_ayah_number` range `1..6236`
+- `page_number` range `1..604`
+- `juz_number` range `1..30`
+- `hizb_number` range `1..60`
+- `rub_el_hizb_number` range `1..240`
+- `translations.is_public` cannot be true until the translation review status is `approved`
+
+### Private-by-default personal data tables
+
+- `reading_sessions`
+- `reading_progress`
+- `reading_plans`
+- `bookmarks`
+- `notes`
+
+These tables all default to `is_private = true` at the schema level.
+
+### Semantic search metadata table
+
+- `semantic_embeddings` stores embedding provider/model metadata, indexed text hashes, and index document references.
+- Each embedding row must point to exactly one target: either an `ayah` or an `ayah_translation`.
+
+## Local Migration And Seed Workflow
+
+Run the initial schema migration from the repository root:
+
+```bash
+./scripts/run-db-migrations.sh
+```
+
+Seed the evaluated upstream source metadata:
+
+```bash
+./scripts/seed-source-metadata.sh
+```
+
+If `QURANKIT_DATABASE_URL` is unset, both scripts default to `apps/api/.data/qurankit.db`.
+
+The current seed step inserts source provenance rows only. Full Quran text import, normalization, and validation against the complete 114-surah and 6236-ayah dataset remain the next data-layer step.
