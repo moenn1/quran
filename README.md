@@ -33,3 +33,37 @@ The initial data foundation should evaluate and document the open-source `Abdull
 ## Development Status
 
 This repository is being bootstrapped.
+
+## Current Foundation
+
+- `compose.yaml` provisions PostgreSQL, a bootstrap API container, a bootstrap web container, and an optional Qdrant profile for semantic-search experiments.
+- `docker/` contains the bootstrap API and web images used to validate self-hosting before the production API, CLI, and web applications land.
+- `.github/workflows/quality.yml` and `.github/workflows/release-readiness.yml` enforce documentation, safety, repository-test, and Docker checks.
+- `docs/` captures self-hosting, testing, religious-safety, API, CLI, and release-readiness guardrails.
+
+## Quick Start
+
+1. Copy `.env.example` to `.env`.
+2. Review `.env.api.example`, `.env.web.example`, and `.env.cli.example` for service-specific overrides.
+3. Set `COMPOSE_PROFILES=semantic-search` in `.env` if you want the optional Qdrant service.
+4. Run `docker compose up --build`.
+5. Visit `http://localhost:3000` for the bootstrap web surface and `http://localhost:8000/health` for the bootstrap API health check.
+6. Run `./scripts/release-readiness.sh` before pushing repository-quality changes.
+
+## Repository Layout
+
+- `.github/workflows`: GitHub Actions for quality and release-readiness gates.
+- `docker/`: Bootstrap API and web container assets for local self-hosting.
+- `docs/`: Self-hosting, testing, safety, API, CLI, and release-readiness documentation.
+- `scripts/`: Repository-quality, test, and smoke-check entry points.
+
+## Documentation
+
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [CHANGELOG.md](CHANGELOG.md)
+- [docs/self-hosting.md](docs/self-hosting.md)
+- [docs/testing.md](docs/testing.md)
+- [docs/religious-safety.md](docs/religious-safety.md)
+- [docs/api.md](docs/api.md)
+- [docs/cli.md](docs/cli.md)
+- [docs/release-readiness.md](docs/release-readiness.md)

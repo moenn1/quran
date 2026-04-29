@@ -1,0 +1,15 @@
+.DS_Store
+.env
+.env.api
+.env.web
+.env.local
+.env.*.local
+.next/
+.venv/
+__pycache__/
+.pytest_cache/
+node_modules/
+coverage/
+apps/web/.next/
+apps/web/node_modules/
+apps/web/coverage/
