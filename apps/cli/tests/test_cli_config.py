@@ -24,10 +24,14 @@ def test_config_show_json_uses_xdg_defaults(tmp_path: Path) -> None:
 
     payload = json.loads(result.stdout)
     assert payload["mode"] == "remote"
+    assert payload["state_mode"] == "local"
     assert payload["api_url"] == "http://localhost:8000"
     assert payload["translation"] == "en.sahih"
     assert payload["db_path"] == str(tmp_path / "data" / "qurankit.sqlite3")
+    assert payload["state_path"] == str(tmp_path / "data" / "study-state.json")
+    assert payload["api_token_configured"] is False
     assert payload["backend_kind"] == "remote"
+    assert payload["study_store_kind"] == "local"
 
 
 def test_config_set_persists_values(tmp_path: Path) -> None:
@@ -42,6 +46,21 @@ def test_config_set_persists_values(tmp_path: Path) -> None:
         ["config", "set", "db-path", str(tmp_path / "library.sqlite3")],
         env=env,
     )
+    state_path_result = runner.invoke(
+        app,
+        ["config", "set", "state-path", str(tmp_path / "study-state.json")],
+        env=env,
+    )
+    state_mode_result = runner.invoke(
+        app,
+        ["config", "set", "state-mode", "remote"],
+        env=env,
+    )
+    token_result = runner.invoke(
+        app,
+        ["config", "set", "api-token", "test-token"],
+        env=env,
+    )
     translation_result = runner.invoke(
         app,
         ["config", "set", "translation", "en.asad"],
@@ -51,14 +70,21 @@ def test_config_set_persists_values(tmp_path: Path) -> None:
 
     assert mode_result.exit_code == 0
     assert db_result.exit_code == 0
+    assert state_path_result.exit_code == 0
+    assert state_mode_result.exit_code == 0
+    assert token_result.exit_code == 0
     assert translation_result.exit_code == 0
     assert show_result.exit_code == 0
 
     payload = json.loads(show_result.stdout)
     assert payload["mode"] == "local"
+    assert payload["state_mode"] == "remote"
     assert payload["db_path"] == str(tmp_path / "library.sqlite3")
+    assert payload["state_path"] == str(tmp_path / "study-state.json")
     assert payload["translation"] == "en.asad"
+    assert payload["api_token_configured"] is True
     assert payload["backend_kind"] == "local"
+    assert payload["study_store_kind"] == "remote"
 
 
 def test_config_set_rejects_invalid_api_url(tmp_path: Path) -> None:

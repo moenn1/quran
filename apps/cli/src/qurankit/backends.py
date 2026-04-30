@@ -248,6 +248,52 @@ class AyahSelection:
 
 
 @dataclass(frozen=True)
+class AyahRangeResult:
+    start_reference: str
+    end_reference: str
+    ayahs: tuple[AyahRecord, ...]
+    arabic_source: ArabicSourceAttribution = field(
+        default_factory=ArabicSourceAttribution
+    )
+    translation_attribution: TranslationAttribution | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "start_reference": self.start_reference,
+            "end_reference": self.end_reference,
+            "ayah_count": len(self.ayahs),
+            "ayahs": [ayah.to_dict() for ayah in self.ayahs],
+            "arabic_source": self.arabic_source.to_dict(),
+            "translation_attribution": (
+                self.translation_attribution.to_dict()
+                if self.translation_attribution is not None
+                else None
+            ),
+        }
+
+    @classmethod
+    def from_dict(cls, payload: Mapping[str, Any]) -> AyahRangeResult:
+        range_payload = _unwrap_mapping(payload, "range")
+        return cls(
+            start_reference=str(range_payload["start_reference"]),
+            end_reference=str(range_payload["end_reference"]),
+            ayahs=tuple(
+                AyahRecord.from_dict(item)
+                for item in range_payload.get("ayahs", [])
+                if isinstance(item, Mapping)
+            ),
+            arabic_source=ArabicSourceAttribution.from_dict(
+                _mapping_value(range_payload, "arabic_source")
+                or _mapping_value(payload, "arabic_source")
+            ),
+            translation_attribution=TranslationAttribution.from_dict(
+                _mapping_value(range_payload, "translation_attribution")
+                or _mapping_value(payload, "translation_attribution")
+            ),
+        )
+
+
+@dataclass(frozen=True)
 class SurahResult:
     surah_number: int
     name_arabic: str
@@ -506,6 +552,13 @@ class QuranBackend(Protocol):
     kind: str
     summary: str
 
+    def get_range(
+        self,
+        start_reference: AyahReference,
+        end_reference: AyahReference,
+        translation_identifier: str | None,
+    ) -> AyahRangeResult: ...
+
     def get_surah(
         self, surah_number: int, translation_identifier: str | None
     ) -> SurahResult: ...
@@ -551,6 +604,62 @@ class RemoteBackend:
             {"translation": translation_identifier},
         )
         return SurahResult.from_dict(payload)
+
+    def get_range(
+        self,
+        start_reference: AyahReference,
+        end_reference: AyahReference,
+        translation_identifier: str | None,
+    ) -> AyahRangeResult:
+        if _reference_key(end_reference) < _reference_key(start_reference):
+            raise BackendValidationError(
+                "Ayah ranges must end at or after their start reference."
+            )
+
+        ayahs: list[AyahRecord] = []
+        translation_attribution: TranslationAttribution | None = None
+
+        for surah_number in range(
+            start_reference.surah_number,
+            end_reference.surah_number + 1,
+        ):
+            surah = self.get_surah(surah_number, translation_identifier)
+            if translation_attribution is None:
+                translation_attribution = surah.translation_attribution
+
+            start_ayah = 1
+            end_ayah: int | None = None
+            if surah_number == start_reference.surah_number:
+                start_ayah = start_reference.ayah_number
+            if surah_number == end_reference.surah_number:
+                end_ayah = end_reference.ayah_number
+
+            selected = [
+                ayah
+                for ayah in surah.ayahs
+                if ayah.ayah_number >= start_ayah
+                and (end_ayah is None or ayah.ayah_number <= end_ayah)
+            ]
+            ayahs.extend(selected)
+
+        if not ayahs:
+            raise BackendNotFoundError(
+                f"Ayah range {start_reference.text}-{end_reference.text} was not "
+                "found in the remote QuranKit API."
+            )
+
+        if ayahs[0].reference != start_reference.text or ayahs[-1].reference != end_reference.text:
+            raise BackendNotFoundError(
+                f"Ayah range {start_reference.text}-{end_reference.text} could not "
+                "be resolved exactly from the remote QuranKit API."
+            )
+
+        return AyahRangeResult(
+            start_reference=ayahs[0].reference,
+            end_reference=ayahs[-1].reference,
+            ayahs=tuple(ayahs),
+            translation_attribution=translation_attribution,
+        )
 
     def get_ayah(
         self, reference: AyahReference, translation_identifier: str | None
@@ -700,6 +809,67 @@ class LocalSQLiteBackend:
                 ayahs=ayahs,
                 translation_attribution=translation_attribution,
             )
+
+    def get_range(
+        self,
+        start_reference: AyahReference,
+        end_reference: AyahReference,
+        translation_identifier: str | None,
+    ) -> AyahRangeResult:
+        if _reference_key(end_reference) < _reference_key(start_reference):
+            raise BackendValidationError(
+                "Ayah ranges must end at or after their start reference."
+            )
+
+        where_clause = """
+            (
+                s.number > ?
+                OR (s.number = ? AND a.number_in_surah >= ?)
+            )
+            AND (
+                s.number < ?
+                OR (s.number = ? AND a.number_in_surah <= ?)
+            )
+        """
+
+        with closing(self._connect(include_translation=translation_identifier is not None)) as conn:
+            translation_id, translation_attribution = self._translation_context(
+                conn, translation_identifier
+            )
+            ayahs = tuple(
+                self._fetch_ayahs(
+                    conn,
+                    where_clause,
+                    (
+                        start_reference.surah_number,
+                        start_reference.surah_number,
+                        start_reference.ayah_number,
+                        end_reference.surah_number,
+                        end_reference.surah_number,
+                        end_reference.ayah_number,
+                    ),
+                    translation_id,
+                )
+            )
+
+        if not ayahs:
+            raise BackendNotFoundError(
+                f"Ayah range {start_reference.text}-{end_reference.text} was not "
+                f"found in the local SQLite database at {self.db_path}."
+            )
+
+        if ayahs[0].reference != start_reference.text or ayahs[-1].reference != end_reference.text:
+            raise BackendNotFoundError(
+                f"Ayah range {start_reference.text}-{end_reference.text} could not "
+                f"be resolved exactly from the local SQLite database at {self.db_path}."
+            )
+
+        return AyahRangeResult(
+            start_reference=ayahs[0].reference,
+            end_reference=ayahs[-1].reference,
+            ayahs=ayahs,
+            translation_attribution=translation_attribution,
+        )
 
     def get_ayah(
         self, reference: AyahReference, translation_identifier: str | None
@@ -1122,6 +1292,10 @@ def _normalize_query(query: str) -> str:
         raise BackendValidationError("Query cannot be empty.")
 
     return normalized
+
+
+def _reference_key(reference: AyahReference) -> tuple[int, int]:
+    return (reference.surah_number, reference.ayah_number)
 
 
 def _tokenize(text: str) -> set[str]:

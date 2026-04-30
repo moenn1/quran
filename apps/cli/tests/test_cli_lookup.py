@@ -14,7 +14,7 @@ from qurankit.backends import (
     SemanticSearchResult,
     TranslationAttribution,
 )
-from qurankit.config import BackendMode, ConfigStore, Settings
+from qurankit.config import BackendMode, ConfigStore, Settings, StateMode
 
 runner = CliRunner()
 
@@ -210,8 +210,10 @@ def _write_settings(
     store.save(
         Settings(
             mode=mode,
+            state_mode=StateMode.LOCAL,
             api_url=api_url,
             db_path=str(db_path or (data_home / "qurankit.sqlite3")),
+            state_path=str(data_home / "study-state.json"),
             translation=translation,
         )
     )

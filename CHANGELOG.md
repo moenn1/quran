@@ -8,6 +8,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 
 ### Added
 
+- Expanded the QuranKit CLI with local-first private study state, `progress`, `bookmark`, `note`, `plan`, and `export` commands, ayah-range parsing, authenticated optional remote study-state mode, attribution-safe surah export, and pytest coverage for private workflow behavior.
 - Added the first `apps/cli` Typer package scaffold with persisted configuration, remote API and local SQLite backend selection, and initial `qurankit config show/set` commands.
 - Expanded the QuranKit CLI with `surah`, `ayah`, `juz`, `random`, `search`, and `semantic` commands, shared `--json` and translation controls, remote/local backend execution, attribution-aware output, and Typer coverage for lookup, exact search, and textual-similarity search behavior.
 - Bootstrapped the `apps/web` Next.js frontend foundation with Arabic-inspired theme tokens, shared layout components, and route scaffolding for browse, reader, search, semantic search, progress, plans, bookmarks, notes, and settings.

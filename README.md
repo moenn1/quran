@@ -13,7 +13,7 @@ If I am doing anything wrong Islamically, please DM me directly so I can correct
 ## Planned Scope
 
 - A clean REST API for Quran text, metadata, translations, search, bookmarks, notes, and reading progress.
-- A CLI for terminal-based reading, exact search, semantic search, and progress tracking.
+- A CLI for terminal-based reading, exact search, semantic search, progress tracking, reading plans, bookmarks, notes, and exports.
 - A web UI for browsing, exact search, semantic search, reading plans, bookmarks, and notes.
 - A normalized Quran database with validation scripts and source attribution.
 - Self-hostable local development with Docker Compose, PostgreSQL, and optional vector search.
@@ -36,10 +36,10 @@ This repository is being bootstrapped.
 
 ## Current Foundation
 
-- `apps/cli` contains the Typer CLI with persisted config plus `surah`, `ayah`, `juz`, `random`, `search`, and `semantic` commands for remote API and local SQLite modes.
+- `apps/cli` contains the Typer CLI with persisted config, local-first private study state, and `surah`, `ayah`, `juz`, `random`, `search`, `semantic`, `progress`, `bookmark`, `note`, `plan`, and `export` commands.
 - `apps/web` contains the initial Next.js web app scaffold for QuranKit.
 - `docs/frontend-architecture.md` documents the Arabic-inspired UI direction, route structure, and frontend component boundaries.
-- `docs/cli.md` documents installation, config storage, lookup commands, exact search, semantic search, and backend expectations for the CLI.
+- `docs/cli.md` documents installation, config storage, lookup commands, private study workflows, export commands, and backend expectations for the CLI.
 - `CHANGELOG.md` tracks repository changes across the repository foundation, CLI scaffold, and frontend architecture.
 
 ## Development
@@ -79,7 +79,7 @@ npm run build
 
 ## Repository Layout
 
-- `apps/cli`: Typer CLI package, config storage, lookup/search commands, backend selection, and CLI tests.
+- `apps/cli`: Typer CLI package, config storage, private study state, lookup/search commands, export flows, backend selection, and CLI tests.
 - `apps/web`: Next.js web app shell, pages, styling, and tests.
 - `docs/database.md`: Source evaluation, attribution plan, and normalization guidance for the upstream Quran data.
 - `docs/frontend-architecture.md`: Frontend direction, route map, and implementation boundaries.
