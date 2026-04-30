@@ -32,5 +32,5 @@ QuranKit should not be tagged or promoted without passing the following checks.
 
 ## GitHub Actions
 
-- `Quality` runs on pull requests and pushes to `main`.
-- `Release Readiness` can be triggered manually before a release cut.
+- `Quality` runs on pull requests and pushes to `main`, and its test job provisions `apps/api[dev]` plus the Chromium browser runtime before data validation and Playwright-backed checks.
+- `Release Readiness` can be triggered manually before a release cut, and it provisions `apps/api[dev]` plus the Chromium browser runtime before `./scripts/release-readiness.sh`.

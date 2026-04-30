@@ -38,6 +38,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 
 ### Fixed
 
+- Aligned GitHub Actions with QuranKit's checked-in release entrypoints by provisioning `apps/api[dev]`, restoring Playwright browser installation for the manual release workflow, and adding a workflow-parity guard in `./scripts/check-workflows.sh`.
 - Added a reproducible `./scripts/export-release-screenshots.sh` path and linked the new release assets from the README so release screenshots stay tied to approved Playwright visual baselines instead of ad hoc copies.
 - Clarified that the current Docker bootstrap API is only a health-and-safety surface, while the documented `/api/v1/...` routes remain a production contract for future API work and CLI remote mode.
 - Made CLI test automation reproducible in clean environments by installing `apps/cli[dev]` in GitHub Actions, updating `./scripts/run-cli-tests.sh` to use one Python interpreter consistently, and documenting the required local setup.

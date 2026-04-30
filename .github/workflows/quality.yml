@@ -78,6 +78,10 @@ jobs:
         if: ${{ hashFiles('apps/cli/pyproject.toml') != '' }}
         run: python -m pip install -e './apps/cli[dev]'
 
+      - name: Install API development dependencies
+        if: ${{ hashFiles('apps/api/pyproject.toml') != '' }}
+        run: python -m pip install -e './apps/api[dev]'
+
       - name: Set up Node.js
         if: ${{ hashFiles('package-lock.json') != '' }}
         uses: actions/setup-node@v4

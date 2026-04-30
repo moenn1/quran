@@ -33,9 +33,12 @@ This document complements the repository-root [CONTRIBUTING.md](../CONTRIBUTING.
 Run the docs guardrails before pushing documentation changes:
 
 ```bash
+./scripts/lint-repo.sh
 ./scripts/check-docs.sh
 ./scripts/release-readiness.sh
 ```
+
+`./scripts/lint-repo.sh` also verifies that GitHub Actions still provision the backend and Playwright browser runtime required by QuranKit's checked-in validation and release entrypoints.
 
 Use narrower checks too when relevant:
 

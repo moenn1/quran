@@ -4,7 +4,8 @@ QuranKit needs layered verification across repository quality, backend behavior,
 
 ## Repository Baseline
 
-- `./scripts/lint-repo.sh` checks shell syntax and bootstrap Python syntax.
+- `./scripts/lint-repo.sh` checks shell syntax, bootstrap Python syntax, and CI workflow provisioning parity.
+- `./scripts/check-workflows.sh` keeps GitHub Actions aligned with the repository's data-validation and Playwright-backed release entrypoints.
 - `./scripts/check-docs.sh` enforces required files and repository guarantees such as the maintainer note, semantic-search disclaimer, privacy defaults, and release docs.
 - `./scripts/check-docs.sh` also requires the dedicated API, CLI, database, semantic-search, reading-tracker, and contributor docs so release notes and implementation docs do not drift apart.
 - `./scripts/check-docs.sh` also pins the CLI install path and CLI-facing safety wording so release docs do not drift from the tested setup.

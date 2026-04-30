@@ -49,6 +49,7 @@ for file in \
   docs/contributing.md \
   docs/release-readiness.md \
   scripts/analyze_upstream_quran_sql.py \
+  scripts/check-workflows.sh \
   scripts/export-release-screenshots.sh \
   scripts/lib/cli-python.sh \
   scripts/smoke-cli.sh \
@@ -72,6 +73,7 @@ assert_text README.md "docs/release-process.md"
 assert_text CHANGELOG.md "## [Unreleased]"
 assert_text CONTRIBUTING.md "git config user.name \"Mohamed En-Nassibi\""
 assert_text CONTRIBUTING.md "git config user.email \"mohamed.enn2001@gmail.com\""
+assert_text CONTRIBUTING.md "python -m pip install -e 'apps/api[dev]'"
 assert_text apps/cli/README.md "configuration storage for remote API and local SQLite modes"
 assert_text apps/cli/README.md 'initial `config show` and `config set` commands'
 assert_text docs/self-hosting.md "qdrant"
@@ -109,8 +111,12 @@ assert_text docs/contributing.md "docs/release-demo.md"
 assert_text docs/release-readiness.md "./scripts/smoke-cli.sh"
 assert_text docs/release-readiness.md "docs/release-safety-checklist.md"
 assert_text docs/release-readiness.md "docs/release-demo.md"
+assert_text docs/release-readiness.md "apps/api[dev]"
+assert_text docs/release-readiness.md "Chromium browser runtime"
 assert_text docs/frontend-architecture.md "Semantic results must never be presented as tafsir, fatwa, or rulings."
 assert_text docs/testing.md "./scripts/run-e2e.sh"
 assert_text docs/testing.md ".venv/bin/python"
 assert_text docs/testing.md "./scripts/smoke-cli.sh"
 assert_text docs/testing.md "./scripts/export-release-screenshots.sh"
+assert_text docs/testing.md "./scripts/check-workflows.sh"
+assert_text docs/contributing.md "./scripts/lint-repo.sh"

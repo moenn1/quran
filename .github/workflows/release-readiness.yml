@@ -25,6 +25,10 @@ jobs:
         if: ${{ hashFiles('apps/cli/pyproject.toml') != '' }}
         run: python -m pip install -e './apps/cli[dev]'
 
+      - name: Install API development dependencies
+        if: ${{ hashFiles('apps/api/pyproject.toml') != '' }}
+        run: python -m pip install -e './apps/api[dev]'
+
       - name: Set up Node.js
         if: ${{ hashFiles('package-lock.json') != '' }}
         uses: actions/setup-node@v4
@@ -35,6 +39,10 @@ jobs:
       - name: Install workspace dependencies
         if: ${{ hashFiles('package-lock.json') != '' }}
         run: npm ci
+
+      - name: Install Playwright browser
+        if: ${{ hashFiles('apps/web/package.json') != '' }}
+        run: npx playwright install --with-deps chromium
 
       - name: Ensure scripts are executable
         run: chmod +x scripts/*.sh
