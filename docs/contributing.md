@@ -12,6 +12,8 @@ This document complements the repository-root [CONTRIBUTING.md](../CONTRIBUTING.
   Update `docs/database.md`, any attribution notes, and `README.md` when project guarantees change.
 - Docker, environment, or self-hosting changes:
   Update `docs/self-hosting.md`, `README.md`, and release-readiness notes together.
+- Religious-safety or privacy review criteria changes:
+  Update `docs/religious-safety.md`, `docs/release-safety-checklist.md`, and any affected API, CLI, semantic-search, or reading-tracker docs together.
 - Contributor workflow changes:
   Update both `CONTRIBUTING.md` and this file so the root entry point and the docs map stay aligned.
 
@@ -22,6 +24,7 @@ This document complements the repository-root [CONTRIBUTING.md](../CONTRIBUTING.
 - Keep the semantic-search disclaimer consistent across docs and UI copy.
 - Keep privacy defaults consistent across API, CLI, reading-tracker, and self-hosting docs.
 - Keep source-attribution rules consistent across database, API, CLI, and export docs.
+- Keep the release-safety checklist aligned with the README note, privacy wording, and semantic-search guardrails.
 
 ## Validation Workflow
 

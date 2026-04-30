@@ -13,6 +13,7 @@ These rules are release blockers for QuranKit.
 ## Documentation Requirements
 
 - Keep the README maintainer note intact: the maintainer is not an Islamic scholar, the project has no commercial gain, and Islamic mistakes should be reported directly so they can be corrected.
+- Keep release-facing copy non-commercial. Do not add pricing, subscriptions, customer language, or monetization framing.
 - Document upstream data sources, versioning, and validation rules before importing Quran data.
 - Keep API, CLI, and web documentation explicit about the difference between exact search and semantic search.
 
@@ -24,8 +25,7 @@ These rules are release blockers for QuranKit.
 
 ## Release Checklist
 
-- Verify upstream source provenance and attribution before shipping Quran data.
-- Verify that privacy defaults for bookmarks, notes, and reading progress are still private.
-- Verify that semantic-search copy remains descriptive and not interpretive.
-- Verify that API, CLI, and web surfaces communicate limitations clearly.
-- Verify that no changes normalize, rewrite, or otherwise alter Quran text.
+Use [docs/release-safety-checklist.md](release-safety-checklist.md) before tagging a release or marking a privacy or religious-safety issue done.
+
+- Every unchecked item in that checklist is a release blocker.
+- The checklist must stay aligned with README wording, export/delete affordances, semantic-search disclaimers, and private-by-default study-state behavior.
