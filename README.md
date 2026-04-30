@@ -53,6 +53,14 @@ Key endpoints:
 
 - `GET /`
 - `GET /api/v1/health`
+- `GET /api/v1/surahs`
+- `GET /api/v1/surahs/{surah_number}`
+- `GET /api/v1/surahs/{surah_number}/ayahs`
+- `GET /api/v1/ayahs/{reference}`
+- `GET /api/v1/ayahs/random`
+- `GET /api/v1/juz/{number}`
+- `GET /api/v1/hizb/{number}`
+- `GET /api/v1/pages/{number}`
 - `GET /docs`
 - `GET /openapi.json`
 
@@ -92,5 +100,11 @@ The data pipeline now:
 - validates the locked upstream dump for 114 surahs, 6236 ayahs, sequential global ayah numbers, per-surah sequencing, metadata ranges, and full edition coverage
 - preserves exact sourced Quran text, including the upstream BOM artifact on the first ayah, while recording source checksums and dump metadata
 - loads normalized QuranKit tables and emits SQLite, JSON, and PostgreSQL seed artifacts from the same locked source snapshot
+
+The browse API now:
+
+- resolves ayahs by global number or `surah:ayah` reference
+- paginates surah, juz, hizb, and page browse responses
+- returns source attribution alongside Quran text responses
 
 Additional backend notes live in [docs/api.md](docs/api.md), [docs/database.md](docs/database.md), and [docs/testing.md](docs/testing.md).

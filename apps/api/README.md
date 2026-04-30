@@ -13,10 +13,18 @@ python -m pip install -e ".[dev]"
 uvicorn qurankit_api.main:app --reload
 ```
 
-The scaffold exposes:
+The API now exposes:
 
 - `GET /`
 - `GET /api/v1/health`
+- `GET /api/v1/surahs`
+- `GET /api/v1/surahs/{surah_number}`
+- `GET /api/v1/surahs/{surah_number}/ayahs`
+- `GET /api/v1/ayahs/{reference}`
+- `GET /api/v1/ayahs/random`
+- `GET /api/v1/juz/{number}`
+- `GET /api/v1/hizb/{number}`
+- `GET /api/v1/pages/{number}`
 - `GET /docs`
 - `GET /openapi.json`
 
@@ -25,6 +33,7 @@ It also now includes:
 - SQLAlchemy models for Quran text, translation, attribution, personal reading state, and semantic embedding metadata
 - Alembic migrations under `apps/api/alembic`
 - a locked-source normalization, validation, load, and export pipeline for the evaluated upstream snapshot
+- database-backed browse handlers that read normalized surah and ayah data from the configured QuranKit database
 
 Run the backend tests from the repository root with:
 

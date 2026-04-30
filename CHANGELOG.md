@@ -10,3 +10,4 @@
 - Added private-by-default persistence tables for reading state plus semantic embedding metadata constraints for future search indexing.
 - Added backend run instructions, API/testing docs, and a repository-level backend pytest entrypoint.
 - Added a locked-source normalization pipeline with checksum validation, exact-text loading, human-readable validation output, and SQLite/JSON/PostgreSQL export generation.
+- Added database-backed Quran browse endpoints for surahs, ayahs, juz, hizb, pages, and random ayah lookup with source attribution and browse API pytest coverage.

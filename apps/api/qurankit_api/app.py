@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, Request
@@ -7,6 +8,7 @@ from fastapi import Depends, FastAPI, Request
 from qurankit_api.api.router import router as api_router
 from qurankit_api.core.config import Settings, get_app_settings, get_settings
 from qurankit_api.core.errors import register_exception_handlers
+from qurankit_api.db import create_engine_from_url, create_session_factory
 from qurankit_api.schemas.errors import COMMON_ERROR_RESPONSES
 from qurankit_api.schemas.health import ServiceInfo
 
@@ -24,10 +26,29 @@ def build_openapi_description(settings: Settings) -> str:
 def create_app(settings: Settings | None = None) -> FastAPI:
     app_settings = settings or get_settings()
 
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        engine = None
+        session_factory = None
+
+        if app_settings.database_url:
+            engine = create_engine_from_url(app_settings.database_url)
+            session_factory = create_session_factory(engine)
+
+        app.state.engine = engine
+        app.state.session_factory = session_factory
+
+        try:
+            yield
+        finally:
+            if engine is not None:
+                engine.dispose()
+
     app = FastAPI(
         title=app_settings.app_name,
         version=app_settings.app_version,
         description=build_openapi_description(app_settings),
+        lifespan=lifespan,
         contact={
             "name": "Mohamed En-Nassibi",
             "email": app_settings.support_email,
@@ -43,6 +64,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             {
                 "name": "Health",
                 "description": "Lightweight API availability checks.",
+            },
+            {
+                "name": "Quran Browse",
+                "description": "Read Quran browse data from the normalized QuranKit database.",
             },
         ],
     )

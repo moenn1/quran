@@ -10,6 +10,9 @@ from qurankit_api import models as _models  # noqa: F401
 from qurankit_api.app import create_app
 from qurankit_api.db import Base, create_engine_from_url, create_session_factory
 from qurankit_api.core.config import Settings
+from qurankit_api.data.pipeline import load_normalized_dataset
+
+from tests.support.sample_dataset import SAMPLE_EXPECTATIONS, write_sample_zip
 
 
 @pytest.fixture
@@ -65,3 +68,36 @@ def migrated_database_url(sqlite_database_url: str) -> str:
     config.set_main_option("sqlalchemy.url", sqlite_database_url)
     command.upgrade(config, "head")
     return sqlite_database_url
+
+
+@pytest.fixture
+def sample_artifact_path(tmp_path: Path) -> Path:
+    return write_sample_zip(tmp_path / "sample-quran.sql.zip")
+
+
+@pytest.fixture
+def loaded_database_url(
+    migrated_database_url: str,
+    sample_artifact_path: Path,
+) -> str:
+    load_normalized_dataset(
+        migrated_database_url,
+        artifact_path=sample_artifact_path,
+        expectations=SAMPLE_EXPECTATIONS,
+        verify_locked_source=False,
+    )
+    return migrated_database_url
+
+
+@pytest.fixture
+def browse_client(loaded_database_url: str) -> TestClient:
+    settings = Settings(
+        app_name="QuranKit API Test",
+        app_version="0.1.0-test",
+        environment="test",
+        redoc_url=None,
+        database_url=loaded_database_url,
+    )
+
+    with TestClient(create_app(settings)) as test_client:
+        yield test_client
