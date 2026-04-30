@@ -19,8 +19,13 @@ export function SectionCard({
   tone = "neutral",
 }: ContentCard) {
   return (
-    <article className={cn("surface-card", toneClassNames[tone])}>
-      <div className="surface-card__body">
+    <article
+      className={cn(
+        "surface-card flex h-full flex-col rounded-[var(--radius-lg)]",
+        toneClassNames[tone],
+      )}
+    >
+      <div className="surface-card__body flex flex-1 flex-col gap-4">
         <h3 className="surface-card__title">{title}</h3>
         <p className="surface-card__description">{description}</p>
         {items ? (

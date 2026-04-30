@@ -27,7 +27,7 @@ QuranKit now includes a bootstrap self-hosting path so infrastructure, privacy d
 
 - `.env.example`: shared Compose defaults for ports, database credentials, privacy mode, and semantic-search toggles.
 - `.env.api.example`: API-specific defaults, including attribution and semantic-search warning text.
-- `.env.web.example`: web-specific defaults, including API base URL and privacy notice text.
+- `.env.web.example`: web-specific defaults, including the Next.js API base URL (`NEXT_PUBLIC_API_URL`) and privacy notice text.
 
 ## Persistence and Privacy
 
@@ -40,4 +40,5 @@ QuranKit now includes a bootstrap self-hosting path so infrastructure, privacy d
 
 - The current `api` and `web` containers are bootstrap services that prove the self-hosting path and surface the project guardrails.
 - They are intentionally minimal and should be replaced with the production API and web applications as those codebases land.
+- The real `apps/web` Next.js application expects `NEXT_PUBLIC_API_URL` when you point it at a running QuranKit API outside the bootstrap container flow.
 - The bootstrap stack does not ship Quran data yet. Data import and validation must be added only after source attribution and integrity checks are in place.

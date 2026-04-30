@@ -12,12 +12,15 @@ export function PageHero({
   pills = [],
 }: PageHeroProps) {
   return (
-    <section className="page-hero">
+    <section className="page-hero flex flex-col gap-5 md:gap-6">
       <p className="section-label">{eyebrow}</p>
       <h1 className="page-hero__title">{title}</h1>
       <p className="page-hero__description">{description}</p>
       {pills.length > 0 ? (
-        <ul className="pill-list" aria-label={`${eyebrow} highlights`}>
+        <ul
+          className="pill-list flex flex-wrap gap-2"
+          aria-label={`${eyebrow} highlights`}
+        >
           {pills.map((pill) => (
             <li key={pill} className="pill">
               {pill}

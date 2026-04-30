@@ -14,8 +14,8 @@ export function AppShell({ children }: AppShellProps) {
       <a href="#main-content" className="skip-link">
         Skip to content
       </a>
-      <div className="app-shell">
-        <div className="shell-frame">
+      <div className="app-shell min-h-screen px-4 py-4 md:px-5">
+        <div className="shell-frame mx-auto w-full max-w-[78rem]">
           <header className="shell-header">
             <div className="shell-header__top">
               <div className="brand-block">
@@ -36,10 +36,10 @@ export function AppShell({ children }: AppShellProps) {
             </div>
             <SiteNavigation />
           </header>
-          <main id="main-content" className="page-stack">
+          <main id="main-content" className="page-stack flex flex-col gap-6 md:gap-8">
             {children}
           </main>
-          <footer className="site-footer">
+          <footer className="site-footer mt-6 md:mt-8">
             <p>
               QuranKit is a personal project for respectful study and
               development. It is not a source of tafsir, fatwa, or religious

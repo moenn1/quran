@@ -9,10 +9,12 @@ The web app should feel Arabic-inspired, classical, and respectful without drift
 The initial foundation lives in `apps/web` and establishes:
 
 - A Next.js App Router structure for the public browse and study surfaces.
-- A shared visual system in `src/app/globals.css` using parchment-toned surfaces, restrained geometric framing, and accessible contrast.
+- A shared visual system in `src/app/globals.css` using parchment-toned surfaces, restrained geometric framing, accessible contrast, and a Tailwind utility layer for layout composition.
 - Reusable presentation components for the shell, page hero, section cards, semantic disclaimer, and attributed reader preview.
+- A root app provider with TanStack Query defaults and an API client layer that can target the QuranKit HTTP service without changing the current local-first study model.
+- The API client defaults to `http://localhost:8000` and reads `NEXT_PUBLIC_API_URL` when the web app is pointed at another QuranKit API deployment.
 - Route foundations for `/`, `/reader`, `/search`, `/semantic`, `/progress`, `/plans`, `/bookmarks`, `/notes`, and `/settings`.
-- Initial Vitest coverage for reader attribution, semantic-search guardrails, and route architecture data.
+- Initial Vitest coverage for reader attribution, semantic-search guardrails, route architecture data, API client setup, and the runtime foundation panel.
 
 ## Visual Direction
 
@@ -50,20 +52,24 @@ The initial foundation lives in `apps/web` and establishes:
 ## Component Boundaries
 
 - `src/app/*`: Route entry points and page composition.
+- `src/components/app-providers.tsx`: Root client provider for TanStack Query.
 - `src/components/app-shell.tsx`: Shared shell with header, navigation, and footer safeguards.
 - `src/components/site-navigation.tsx`: Small client island for active navigation state.
 - `src/components/page-hero.tsx`: Route-level hero copy and pill metadata.
 - `src/components/section-card.tsx` and `section-deck.tsx`: Reusable content grids for architecture pages.
+- `src/components/runtime-foundation.tsx`: Home-page status surface that exposes the current API base URL, query cache policy, and privacy-first study-state direction.
 - `src/components/reader-preview.tsx`: Attributed Quran-text sample used to define reader spacing and hierarchy.
 - `src/components/semantic-disclaimer.tsx`: Shared similarity-search guardrail copy.
 - `src/lib/site-data.ts`: Central source for route metadata, card content, and the attributed preview ayat.
+- `src/lib/api/*`: Shared API client and query-client setup for live data integration.
 
 ## Data and State Direction
 
 - Server components should remain the default for read-heavy views.
-- Small client islands are acceptable for navigation state, future reader preferences, and interactive study tools.
+- Small client islands are acceptable for navigation state, future reader preferences, interactive study tools, and TanStack Query-backed state that benefits from client-side caching.
 - Progress, bookmarks, notes, and plans should default to local persistence first.
 - Remote sync should remain opt-in and clearly explained when introduced.
+- API transport details should stay centralized in the shared client layer so route components do not hand-roll fetch logic.
 - Whenever Quran text or translations appear, attribution should remain attached to the visible surface.
 
 ## Search Safety Rules

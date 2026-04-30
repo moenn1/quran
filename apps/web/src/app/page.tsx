@@ -1,5 +1,6 @@
 import { PageHero } from "@/components/page-hero";
 import { ReaderPreview } from "@/components/reader-preview";
+import { RuntimeFoundation } from "@/components/runtime-foundation";
 import { SectionDeck } from "@/components/section-deck";
 import { SemanticDisclaimer } from "@/components/semantic-disclaimer";
 import {
@@ -23,6 +24,7 @@ export default function HomePage() {
         description="The landing page works as a browse surface for the major reader and study experiences, keeping the architecture legible before data integration lands."
         cards={homeFeatureCards}
       />
+      <RuntimeFoundation />
       <ReaderPreview />
       <SemanticDisclaimer />
       <SectionDeck

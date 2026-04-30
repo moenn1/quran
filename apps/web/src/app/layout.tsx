@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import "@/app/globals.css";
 
+import { AppProviders } from "@/components/app-providers";
 import { AppShell } from "@/components/app-shell";
 
 export const metadata: Metadata = {
@@ -20,9 +21,11 @@ type RootLayoutProps = {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en">
-      <body>
-        <AppShell>{children}</AppShell>
+    <html lang="en" className="scroll-smooth">
+      <body className="min-h-screen bg-transparent text-[color:var(--ink)]">
+        <AppProviders>
+          <AppShell>{children}</AppShell>
+        </AppProviders>
       </body>
     </html>
   );
