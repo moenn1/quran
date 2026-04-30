@@ -12,6 +12,7 @@ from qurankit_api.models.core import (
     TranslationReviewStatus,
 )
 from qurankit_api.models.user_data import (
+    AuthToken,
     Bookmark,
     Note,
     ReadingPlan,
@@ -22,6 +23,7 @@ from qurankit_api.models.user_data import (
 )
 
 __all__ = [
+    "AuthToken",
     "Ayah",
     "AyahTranslation",
     "Bookmark",

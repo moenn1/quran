@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     )
     database_url: str | None = None
     support_email: str = "mohamed.enn2001@gmail.com"
+    auth_min_password_length: int = 8
+    auth_password_iterations: int = 310_000
 
 
 @lru_cache(maxsize=1)

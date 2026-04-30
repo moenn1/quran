@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, inspect
 
 
 EXPECTED_TABLES = {
+    "auth_tokens",
     "ayah_translations",
     "ayahs",
     "bookmarks",
@@ -32,6 +33,8 @@ def test_alembic_upgrade_creates_expected_tables_and_columns(
     }
     translation_columns = {column["name"] for column in inspector.get_columns("translations")}
     bookmark_columns = {column["name"] for column in inspector.get_columns("bookmarks")}
+    user_columns = {column["name"] for column in inspector.get_columns("users")}
+    plan_columns = {column["name"] for column in inspector.get_columns("reading_plans")}
     ayah_indexes = {index["name"] for index in inspector.get_indexes("ayahs")}
     ayah_translation_indexes = {
         index["name"] for index in inspector.get_indexes("ayah_translations")
@@ -46,6 +49,8 @@ def test_alembic_upgrade_creates_expected_tables_and_columns(
     assert {"search_text", "text_sha256"} <= ayah_translation_columns
     assert {"review_status", "is_public", "license_name"} <= translation_columns
     assert {"ayah_global_number", "is_private"} <= bookmark_columns
+    assert {"password_hash", "password_salt", "password_hash_iterations"} <= user_columns
+    assert {"completed_through_ayah_global_number", "target_ayahs_per_day"} <= plan_columns
     assert "ix_ayahs_search_text" in ayah_indexes
     assert "ix_ayah_translations_search_text" in ayah_translation_indexes
 
