@@ -56,6 +56,7 @@ Some scripts intentionally no-op until their corresponding application surfaces 
 - Keep `README.md` coherent with the current project state and preserve the maintainer note.
 - Update `docs/self-hosting.md` when Compose services, container assumptions, or environment variables change.
 - Update `docs/testing.md` when new test suites or verification rules are introduced.
+- Update `docs/release-demo.md`, `docs/roadmap.md`, and `docs/release-process.md` when release-facing commands, screenshots, hosted-demo notes, or tag instructions change.
 - Update `docs/religious-safety.md` whenever religious-safety, privacy, source-attribution, or UI-readability rules change.
 - Update `docs/release-safety-checklist.md` whenever privacy or religious-safety release criteria change.
 - Update `docs/api.md` and `docs/cli.md` when interfaces or guarantees change.

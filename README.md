@@ -42,6 +42,7 @@ This repository is being bootstrapped.
 - `docs/frontend-architecture.md` documents the Arabic-inspired UI direction, route structure, and frontend component boundaries.
 - `docs/api.md`, `docs/cli.md`, `docs/semantic-search.md`, `docs/reading-tracker.md`, `docs/testing.md`, and `docs/release-safety-checklist.md` document the API contract, implemented backend behavior, CLI workflows, semantic-search guardrails, private study-state behavior, release-blocking safety checks, and test expectations that future services must preserve.
 - `docs/database.md` and `docs/contributing.md` document upstream data provenance, attribution constraints, normalization details, and contributor workflow expectations.
+- `docs/release-demo.md`, `docs/roadmap.md`, and `docs/release-process.md` package the release demo flow, hosted-demo notes, screenshots, roadmap, and tag instructions for the first public release.
 - `CHANGELOG.md` tracks repository changes across the API, CLI, frontend, data, and release-safety foundations.
 
 ## Development
@@ -152,10 +153,21 @@ The repository now includes a release-quality bootstrap for self-hosting, docume
 3. Visit `http://localhost:3000` for the bootstrap web UI and `http://localhost:8000/health` for the bootstrap API health check.
 4. Run `./scripts/release-readiness.sh` before pushing repository-quality changes.
 
+## v1 Release Assets
+
+- `docs/release-demo.md` collects local demo commands, hosted-demo notes, the API docs link, the CLI install flow, release screenshots, and a GIF capture plan.
+- `docs/roadmap.md` tracks the v1 release line plus the next practical slices after the first public release.
+- `docs/release-process.md` documents the pre-tag checks, annotated tag commands, and GitHub release handoff.
+- `docs/screenshots/` stores release-facing web screenshots exported from the approved Playwright visual baselines via `./scripts/export-release-screenshots.sh`.
+- `docs/api.md` documents the current API contract, and `http://127.0.0.1:8000/docs` serves the live Swagger UI when `apps/api` is running locally.
+
 ## Documentation
 
 - [CONTRIBUTING.md](CONTRIBUTING.md)
 - [CHANGELOG.md](CHANGELOG.md)
+- [docs/release-demo.md](docs/release-demo.md)
+- [docs/roadmap.md](docs/roadmap.md)
+- [docs/release-process.md](docs/release-process.md)
 - [docs/self-hosting.md](docs/self-hosting.md)
 - [docs/testing.md](docs/testing.md)
 - [docs/religious-safety.md](docs/religious-safety.md)

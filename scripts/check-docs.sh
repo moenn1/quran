@@ -41,9 +41,15 @@ for file in \
   docs/semantic-search.md \
   docs/reading-tracker.md \
   docs/release-safety-checklist.md \
+  docs/release-demo.md \
+  docs/roadmap.md \
+  docs/release-process.md \
+  docs/screenshots/release-exact-search-mobile.png \
+  docs/screenshots/release-surah-reader-desktop.png \
   docs/contributing.md \
   docs/release-readiness.md \
   scripts/analyze_upstream_quran_sql.py \
+  scripts/export-release-screenshots.sh \
   scripts/lib/cli-python.sh \
   scripts/smoke-cli.sh \
   tests/test_analyze_upstream_quran_sql.py \
@@ -60,6 +66,9 @@ assert_text README.md "If I am doing anything wrong Islamically, please DM me di
 assert_text README.md "Semantic search results are related passages by textual similarity, not tafsir, fatwa, or scholarly interpretation."
 assert_text README.md "python -m pip install -e 'apps/cli[dev]'"
 assert_text README.md "./scripts/run-cli-tests.sh"
+assert_text README.md "docs/release-demo.md"
+assert_text README.md "docs/roadmap.md"
+assert_text README.md "docs/release-process.md"
 assert_text CHANGELOG.md "## [Unreleased]"
 assert_text CONTRIBUTING.md "git config user.name \"Mohamed En-Nassibi\""
 assert_text CONTRIBUTING.md "git config user.email \"mohamed.enn2001@gmail.com\""
@@ -86,11 +95,22 @@ assert_text docs/release-safety-checklist.md "Quran text shown in API, CLI, web,
 assert_text docs/release-safety-checklist.md "Related passages by textual similarity only"
 assert_text docs/release-safety-checklist.md "Where a private-study surface supports deletion or removal"
 assert_text docs/release-safety-checklist.md "no commercial gain"
+assert_text docs/release-demo.md "## Hosted Demo Notes"
+assert_text docs/release-demo.md "http://127.0.0.1:8000/docs"
+assert_text docs/release-demo.md "python -m pip install -e 'apps/cli[dev]'"
+assert_text docs/release-demo.md "./scripts/export-release-screenshots.sh"
+assert_text docs/roadmap.md "This roadmap keeps the v1 release scope practical"
+assert_text docs/roadmap.md "hosted previews"
+assert_text docs/release-process.md "git tag -a v1.0.0"
+assert_text docs/release-process.md "./scripts/release-readiness.sh"
 assert_text docs/contributing.md "./scripts/check-docs.sh"
 assert_text docs/contributing.md "./scripts/release-readiness.sh"
+assert_text docs/contributing.md "docs/release-demo.md"
 assert_text docs/release-readiness.md "./scripts/smoke-cli.sh"
 assert_text docs/release-readiness.md "docs/release-safety-checklist.md"
+assert_text docs/release-readiness.md "docs/release-demo.md"
 assert_text docs/frontend-architecture.md "Semantic results must never be presented as tafsir, fatwa, or rulings."
 assert_text docs/testing.md "./scripts/run-e2e.sh"
 assert_text docs/testing.md ".venv/bin/python"
 assert_text docs/testing.md "./scripts/smoke-cli.sh"
+assert_text docs/testing.md "./scripts/export-release-screenshots.sh"

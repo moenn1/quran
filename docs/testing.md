@@ -75,6 +75,7 @@ The current validation workflow checks the locked upstream dataset for:
 - E2E checks should cover exact search, semantic-search disclaimers, bookmarks, notes, and reading-progress behavior.
 - Privacy-sensitive E2E data should use local development fixtures only and never public production data.
 - `./scripts/run-e2e.sh` now runs the Playwright suite from `apps/web`, starts the Next.js web app on a local test port, and exercises the bundled sample routes in Chromium.
+- `./scripts/export-release-screenshots.sh` copies the approved Playwright visual baselines into `docs/screenshots` so release/demo images stay tied to browser-tested layouts.
 - For visual regression updates, run `npm run test:e2e:update --workspace @qurankit/web` after reviewing the new snapshots.
 
 ## Current Bootstrap Commands

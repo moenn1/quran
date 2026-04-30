@@ -12,6 +12,8 @@ This document complements the repository-root [CONTRIBUTING.md](../CONTRIBUTING.
   Update `docs/database.md`, any attribution notes, and `README.md` when project guarantees change.
 - Docker, environment, or self-hosting changes:
   Update `docs/self-hosting.md`, `README.md`, and release-readiness notes together.
+- Release demo, screenshots, roadmap, or tagging changes:
+  Update `docs/release-demo.md`, `docs/roadmap.md`, `docs/release-process.md`, `README.md`, and `CHANGELOG.md` together.
 - Religious-safety or privacy review criteria changes:
   Update `docs/religious-safety.md`, `docs/release-safety-checklist.md`, and any affected API, CLI, semantic-search, or reading-tracker docs together.
 - Contributor workflow changes:
@@ -49,3 +51,4 @@ Use narrower checks too when relevant:
 - If a change affects privacy defaults or authenticated study state, the reading-tracker docs are incomplete until local and remote behavior are both described.
 - If a change affects search semantics or ranking copy, the semantic-search docs are incomplete until the disclaimer and self-hosting implications are updated.
 - If a change affects source provenance, edition review, or normalization rules, the database docs are incomplete until attribution and validation notes are updated.
+- If a change affects release demos, screenshot assets, or tag instructions, the release-demo, roadmap, and release-process docs are incomplete until the README and changelog point at the same story.

@@ -8,6 +8,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 
 ### Added
 
+- Added `docs/release-demo.md`, `docs/roadmap.md`, `docs/release-process.md`, and reproducible `docs/screenshots/` assets so QuranKit now has a release-facing demo guide, hosted-demo notes, roadmap, and annotated tag workflow for the first public release.
 - Added `docs/release-safety-checklist.md` as a dedicated privacy and religious-safety release gate covering Quran text preservation, attribution, semantic-search wording, private-by-default study data, export/delete affordances, README note preservation, and non-commercial framing.
 - Added dedicated API, CLI, database, semantic-search, reading-tracker, and contributor docs so the repository now documents its contract surfaces, privacy defaults, source-attribution rules, and self-hosting caveats more concretely.
 - Added interactive `/search` and `/semantic` web routes with bundled exact-match filtering, result context, similarity-preview controls, optional scores, and private bookmark/plan/copy actions.
@@ -37,6 +38,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 
 ### Fixed
 
+- Added a reproducible `./scripts/export-release-screenshots.sh` path and linked the new release assets from the README so release screenshots stay tied to approved Playwright visual baselines instead of ad hoc copies.
 - Clarified that the current Docker bootstrap API is only a health-and-safety surface, while the documented `/api/v1/...` routes remain a production contract for future API work and CLI remote mode.
 - Made CLI test automation reproducible in clean environments by installing `apps/cli[dev]` in GitHub Actions, updating `./scripts/run-cli-tests.sh` to use one Python interpreter consistently, and documenting the required local setup.
 - Added `./scripts/smoke-cli.sh` and restored the CLI setup path in the release docs so QuranKit now verifies the installed `qurankit` console script and isolated config persistence as part of release-readiness.
