@@ -154,6 +154,45 @@ Exact-search responses include:
 - `translation_attribution` when the request is scoped to one translation edition
 - `edition_attributions` for the edition rows represented in the current page
 
+Illustrative exact-search response:
+
+`GET /api/v1/search/exact?q=guide&translation=en.sahih&limit=5`
+
+```json
+{
+  "query": "guide",
+  "match_type": "exact",
+  "count": 1,
+  "searched_fields": ["arabic_text", "translation"],
+  "results": [
+    {
+      "ayah": {
+        "reference": "1:6",
+        "surah_number": 1,
+        "ayah_number": 6,
+        "surah_name_arabic": "<source-preserved surah name>",
+        "surah_name_english": "Al-Fatihah",
+        "arabic_text": "<source-preserved ayah text>",
+        "translation_text": "<selected translation text>"
+      },
+      "match_sources": ["translation"]
+    }
+  ],
+  "arabic_source": {
+    "repository": "AbdullahGhanem/quran-database",
+    "snapshot": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
+    "note": "Arabic Quran text is shown exactly as stored in the configured QuranKit backend."
+  },
+  "translation_attribution": {
+    "identifier": "en.sahih",
+    "language": "en",
+    "english_name": "Saheeh International",
+    "edition_type": "translation",
+    "format": "text"
+  }
+}
+```
+
 ## Semantic Search Contract
 
 `GET /api/v1/search/semantic` accepts:
@@ -193,6 +232,48 @@ Related passages are ranked by textual similarity only. They are not tafsir, fat
 ```
 
 ## Authenticated Private Study State
+Illustrative semantic-search response:
+
+`GET /api/v1/search/semantic?q=guide+path&translation=en.sahih&limit=5`
+
+```json
+{
+  "query": "guide path",
+  "match_type": "semantic_similarity",
+  "count": 2,
+  "disclaimer": "Related passages are ranked by textual similarity only. They are not tafsir, fatwa, or religious rulings.",
+  "results": [
+    {
+      "ayah": {
+        "reference": "1:6",
+        "surah_number": 1,
+        "ayah_number": 6,
+        "surah_name_english": "Al-Fatihah",
+        "arabic_text": "<source-preserved ayah text>",
+        "translation_text": "<selected translation text>"
+      },
+      "similarity_score": 0.842,
+      "reason": "Shared terms in the selected text: guide, path."
+    }
+  ],
+  "arabic_source": {
+    "repository": "AbdullahGhanem/quran-database",
+    "snapshot": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
+    "note": "Arabic Quran text is shown exactly as stored in the configured QuranKit backend."
+  },
+  "translation_attribution": {
+    "identifier": "en.sahih",
+    "language": "en",
+    "english_name": "Saheeh International",
+    "edition_type": "translation",
+    "format": "text"
+  }
+}
+```
+
+The `reason` field should stay descriptive and mechanical. It should explain why the result matched, not what the ayah means.
+
+## Authenticated Private Study State
 
 `apps/api` now implements a password-based private study surface with opaque bearer tokens:
 
@@ -216,6 +297,47 @@ Private-study behavior:
 - `PUT /api/v1/me/study` remains a full document replacement contract for the CLI's remote-study sync mode.
 - Granular progress, plan, bookmark, note, session, and export routes are implemented in the same service for web clients, tests, and manual API use.
 - Reading plans compute per-day targets from either an explicit `daily_ayah_target` or an inclusive `start_date`/`end_date` span, and they expose derived `today_range`, projected completion, and streak-oriented progress summaries.
+
+Illustrative private study-state request and response:
+
+`GET /api/v1/me/study`
+
+```http
+Authorization: Bearer <token>
+Accept: application/json
+```
+
+```json
+{
+  "state": {
+    "progress": {
+      "range": {
+        "start": { "surah_number": 1, "ayah_number": 1 },
+        "end": { "surah_number": 1, "ayah_number": 7 },
+        "label": "1:1-7"
+      },
+      "updated_at": "2026-04-30T00:00:00+00:00",
+      "source": "manual_mark"
+    },
+    "bookmarks": [
+      {
+        "id": "bookmark-id",
+        "range": {
+          "start": { "surah_number": 2, "ayah_number": 255 },
+          "end": { "surah_number": 2, "ayah_number": 255 },
+          "label": "2:255"
+        },
+        "label": "Evening review",
+        "created_at": "2026-04-30T00:00:00+00:00"
+      }
+    ],
+    "notes": [],
+    "plans": []
+  }
+}
+```
+
+Related auth and validation failures continue to use the structured QuranKit error envelope, including machine-readable `401`/`403` auth failures and `404`/`422` resource or validation errors.
 
 ## Local Run
 
