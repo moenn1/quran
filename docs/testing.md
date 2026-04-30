@@ -31,7 +31,7 @@ QuranKit needs layered verification across repository quality, backend behavior,
 - Component tests should verify rendering, accessibility, and RTL safety.
 - Browser tests should cover search flows, explore filtering, reading views, bookmark/note privacy defaults, ayah navigation, and Arabic typography regressions.
 - Visual review should preserve elegant, Arabic-inspired presentation without reducing readability.
-- The current baseline includes Vitest coverage in `apps/web/src/test` for route architecture, bundled reader-data helpers, explore filtering, reader attribution, reader controls, semantic-search wording, API client URL handling, and the TanStack Query runtime foundation surface.
+- The current baseline includes Vitest coverage in `apps/web/src/test` for route architecture, bundled reader-data helpers, explore filtering, reader attribution, reader controls, exact-search filters and context, semantic-search wording and private actions, API client URL handling, and the TanStack Query runtime foundation surface.
 
 ## Data Validation
 

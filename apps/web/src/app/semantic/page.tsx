@@ -1,7 +1,8 @@
 import { PageHero } from "@/components/page-hero";
-import { SectionDeck } from "@/components/section-deck";
+import { SemanticSearchExperience } from "@/components/semantic-search-experience";
 import { SemanticDisclaimer } from "@/components/semantic-disclaimer";
-import { heroPills, semanticSearchCards } from "@/lib/site-data";
+import { getBundledSurahs } from "@/lib/reader-data";
+import { heroPills } from "@/lib/site-data";
 
 export default function SemanticPage() {
   return (
@@ -13,12 +14,7 @@ export default function SemanticPage() {
         pills={heroPills.semantic}
       />
       <SemanticDisclaimer />
-      <SectionDeck
-        label="Similarity workflow"
-        title="Keep semantic search useful without overstating what it knows"
-        description="QuranKit should separate retrieval quality from religious meaning, and the page architecture needs to make that obvious."
-        cards={semanticSearchCards}
-      />
+      <SemanticSearchExperience surahs={getBundledSurahs()} />
     </>
   );
 }
