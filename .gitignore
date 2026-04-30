@@ -7,9 +7,15 @@
 .next/
 .venv/
 __pycache__/
+.coverage
+.mypy_cache/
 .pytest_cache/
+*.py[cod]
+*.egg-info/
 node_modules/
 coverage/
+apps/api/.data/
+apps/api/.venv/
 apps/web/.next/
 apps/web/node_modules/
 apps/web/coverage/

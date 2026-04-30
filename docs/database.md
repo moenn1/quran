@@ -157,16 +157,16 @@ Normalize the staging data into QuranKit-owned tables:
 | QuranKit table | Notes |
 | --- | --- |
 | `surahs` | Canonical surah metadata |
-| `ayahs` | Canonical ayah rows with `surah_id`, `ayah_number`, `global_ayah_number`, `page_number`, `juz_number`, `hizb_slot`, `sajda` |
-| `ayah_texts` | Text-bearing rows keyed by ayah and edition |
-| `editions` | Edition catalog with type, format, attribution fields, and review status |
+| `ayahs` | Canonical ayah rows with `surah_id`, `ayah_number`, `global_ayah_number`, `page_number`, `juz_number`, `hizb_number`, `rub_el_hizb_number`, and `sajda` |
+| `translations` | Edition catalog with type, format, attribution fields, and review status |
+| `ayah_translations` | Text-bearing translation or Quran simple-text rows keyed by ayah and edition |
 | `source_releases` | Locked provenance records for every import |
 
 Normalization rules:
 
 - preserve the upstream Arabic text exactly in the raw layer
 - derive QuranKit keys such as `surah_number:ayah_number` and `global_ayah_number`
-- derive explicit QuranKit naming for `hizb_slot` or `rub_el_hizb` instead of copying the ambiguous upstream name
+- derive explicit QuranKit naming for `hizb_number` and `rub_el_hizb_number` instead of copying the ambiguous upstream name
 - keep tafsir, translation, transliteration, Quran text, and audio editions distinct
 - do not expose private user features from source data because none exist in this upstream
 
@@ -180,10 +180,38 @@ QuranKit should enforce the following validations during import and in test cove
 - `number_in_surah` is sequential within each surah
 - `page_number` spans `1..604`
 - `juz_number` spans `1..30`
-- `hizb_slot` spans the expected normalized range
+- `hizb_number` spans `1..60`
+- `rub_el_hizb_number` spans `1..240`
 - every imported edition has one row per ayah unless intentionally excluded
 - every public-serving row carries source attribution
 - BOM handling, if any, is explicit and tested
+
+## Implemented Pipeline
+
+The current QuranKit data pipeline now operates against the locked `quran.sql.zip` snapshot directly.
+
+- `./scripts/run-data-validation.sh` downloads or reuses the locked upstream artifact, verifies the expected SHA-256, and validates:
+  - 114 surahs
+  - 6236 ayahs
+  - sequential global ayah ids and numbers
+  - sequential `number_in_surah` values inside each surah
+  - page, juz, hizb, and rub el hizb ranges
+  - full per-edition ayah coverage
+- `./scripts/load-quran-data.sh` applies Alembic migrations, seeds source provenance rows, and loads normalized QuranKit tables into the configured database.
+- `./scripts/build-data-artifacts.sh --output-dir <dir>` emits:
+  - a normalized SQLite database
+  - JSON exports plus a manifest
+  - a PostgreSQL seed SQL export
+
+Current implementation details:
+
+- exact-source Quran text is stored in canonical `ayahs.text`
+- search-only normalized lookup text is stored separately in `ayahs.search_text` and `ayah_translations.search_text`
+- the upstream BOM on the first ayah is preserved and marked in row metadata instead of being silently stripped
+- `hizb_id` is normalized into both `hizb_number` (`1..60`) and `rub_el_hizb_number` (`1..240`)
+- edition rows are imported with source attribution and kept non-public by default until attribution review is complete
+- source provenance records include both the downloaded `quran.sql.zip` artifact and the extracted `quran.sql` payload checksum
+- exact-search indexes are created on the normalized search columns, with PostgreSQL trigram indexes added when the database dialect supports them
 
 ## Illustrative Normalized Serving Record
 
@@ -236,3 +264,75 @@ Proceed with this source only if QuranKit:
 - treats translation and audio editions as separately reviewable assets
 - documents the basmala segmentation behavior
 - normalizes hizb metadata carefully instead of trusting the empty upstream tables
+
+## Implemented Schema Scaffold
+
+The current backend scaffold now includes the first normalized application schema in `apps/api` with Alembic migrations and SQLAlchemy models.
+
+### Source provenance tables
+
+- `source_releases` stores the evaluated upstream repository URL, commit SHA, retrieved artifact checksum, and raw dump metadata strings.
+- `source_files` stores per-artifact metadata such as the `quran.sql.zip` SHA-256 and artifact role.
+
+### Canonical Quran content tables
+
+- `surahs` stores canonical surah metadata keyed by `surah_number`.
+- `ayahs` stores canonical ayah rows keyed by `global_ayah_number` with `ayah_number`, `page_number`, `juz_number`, `hizb_number`, `rub_el_hizb_number`, and exact-source text checksums.
+- `translations` stores translation metadata, attribution fields, rights-review fields, and a public-exposure gate.
+- `ayah_translations` stores per-ayah translation or simple-text edition rows with upstream provenance, exact-text checksums, and search-only normalized text.
+
+Schema guardrails currently enforced in the database layer include:
+
+- `surah_number` range `1..114`
+- `global_ayah_number` range `1..6236`
+- `page_number` range `1..604`
+- `juz_number` range `1..30`
+- `hizb_number` range `1..60`
+- `rub_el_hizb_number` range `1..240`
+- `translations.is_public` cannot be true until the translation review status is `approved`
+
+### Private-by-default personal data tables
+
+- `reading_sessions`
+- `reading_progress`
+- `reading_plans`
+- `bookmarks`
+- `notes`
+
+These tables all default to `is_private = true` at the schema level.
+
+### Semantic search metadata table
+
+- `semantic_embeddings` stores embedding provider/model metadata, indexed text hashes, and index document references.
+- Each embedding row must point to exactly one target: either an `ayah` or an `ayah_translation`.
+
+## Local Migration And Seed Workflow
+
+Run the initial schema migration from the repository root:
+
+```bash
+./scripts/run-db-migrations.sh
+```
+
+Seed the evaluated upstream source metadata only:
+
+```bash
+./scripts/seed-source-metadata.sh
+```
+
+If `QURANKIT_DATABASE_URL` is unset, both scripts default to `apps/api/.data/qurankit.db`.
+
+Load the full normalized Quran dataset:
+
+```bash
+./scripts/load-quran-data.sh
+```
+
+Build normalized artifacts:
+
+```bash
+./scripts/build-data-artifacts.sh --output-dir .data/exports
+```
+
+The locked upstream archive is cached at `apps/api/.data/upstream/quran.sql.zip`.
+Generated build artifacts are ignored by git and can be regenerated on demand.

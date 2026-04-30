@@ -36,21 +36,23 @@ This repository is being bootstrapped.
 
 ## Current Foundation
 
+- `apps/api` contains the FastAPI backend, Alembic migrations, normalized data pipeline, browse routes, and exact-search endpoint.
 - `apps/cli` contains the Typer CLI with persisted config, local-first private study state, and `surah`, `ayah`, `juz`, `random`, `search`, `semantic`, `progress`, `bookmark`, `note`, `plan`, and `export` commands.
 - `apps/web` contains the Next.js web app scaffold with the Arabic-inspired design system, Tailwind utility layer, and TanStack Query/API client foundation for live data.
 - `docs/frontend-architecture.md` documents the Arabic-inspired UI direction, route structure, and frontend component boundaries.
-- `docs/api.md`, `docs/cli.md`, `docs/semantic-search.md`, and `docs/reading-tracker.md` document the planned API contract, CLI workflows, semantic-search guardrails, and private study-state behavior that future services must preserve.
-- `docs/database.md` and `docs/contributing.md` document upstream data provenance, attribution constraints, and contributor workflow expectations.
-- `CHANGELOG.md` tracks repository changes across the repository foundation, CLI scaffold, and frontend architecture.
+- `docs/api.md`, `docs/cli.md`, `docs/semantic-search.md`, `docs/reading-tracker.md`, and `docs/testing.md` document the API contract, implemented backend behavior, CLI workflows, semantic-search guardrails, private study-state behavior, and test expectations that future services must preserve.
+- `docs/database.md` and `docs/contributing.md` document upstream data provenance, attribution constraints, normalization details, and contributor workflow expectations.
+- `CHANGELOG.md` tracks repository changes across the API, CLI, frontend, and data foundations.
 
 ## Development
 
-Set up the Python tooling used by the CLI and repository Python checks:
+Set up the Python tooling used by the CLI, backend, and repository Python checks:
 
 ```bash
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install -e 'apps/cli[dev]'
+python -m pip install -e 'apps/api[dev]'
 ```
 
 Install JavaScript workspace dependencies:
@@ -59,7 +61,14 @@ Install JavaScript workspace dependencies:
 npm ci
 ```
 
-`./scripts/run-cli-tests.sh` and `./scripts/smoke-cli.sh` prefer `.venv/bin/python` when it exists so local CLI checks use the same environment consistently.
+`./scripts/run-cli-tests.sh`, `./scripts/smoke-cli.sh`, `./scripts/run-backend-tests.sh`, and `./scripts/run-data-validation.sh` prefer `.venv/bin/python` when it exists so local Python checks use the same environment consistently.
+
+Run the backend API:
+
+```bash
+cd apps/api
+uvicorn qurankit_api.main:app --reload
+```
 
 Run the web app:
 
@@ -73,15 +82,56 @@ Run checks:
 npm test
 npm run lint
 npm run build
+./scripts/run-backend-tests.sh
 ./scripts/run-cli-tests.sh
 ./scripts/smoke-cli.sh
 ./scripts/run-data-validation.sh
 ```
 
+## Backend Development
+
+The first QuranKit API scaffold lives in `apps/api`.
+
+Key endpoints:
+
+- `GET /`
+- `GET /api/v1/health`
+- `GET /api/v1/surahs`
+- `GET /api/v1/surahs/{surah_number}`
+- `GET /api/v1/surahs/{surah_number}/ayahs`
+- `GET /api/v1/ayahs/{reference}`
+- `GET /api/v1/ayahs/random`
+- `GET /api/v1/juz/{number}`
+- `GET /api/v1/hizb/{number}`
+- `GET /api/v1/pages/{number}`
+- `GET /api/v1/search/exact`
+- `GET /docs`
+- `GET /openapi.json`
+
+Validate and load the locked upstream dataset:
+
+```bash
+./scripts/run-data-validation.sh
+./scripts/run-db-migrations.sh
+./scripts/load-quran-data.sh
+```
+
+Build normalized SQLite, JSON, and PostgreSQL seed artifacts:
+
+```bash
+./scripts/build-data-artifacts.sh --output-dir .data/exports
+```
+
+If `QURANKIT_DATABASE_URL` is unset, the database scripts default to `apps/api/.data/qurankit.db`.
+The locked upstream archive is cached at `apps/api/.data/upstream/quran.sql.zip`.
+Build artifacts default to `apps/api/.data/exports` unless `--output-dir` is provided.
+
 ## Repository Layout
 
+- `apps/api`: FastAPI backend package, normalized data pipeline, Alembic migrations, browse and exact-search routes, and backend tests.
 - `apps/cli`: Typer CLI package, config storage, private study state, lookup/search commands, export flows, backend selection, and CLI tests.
 - `apps/web`: Next.js web app shell, Arabic-inspired styling, Tailwind/Query foundation, route pages, and frontend tests.
+- `docs/api.md`: Bootstrap-vs-backend API notes, exact-search contract details, and planned semantic/private API surfaces.
 - `docs/database.md`: Source evaluation, attribution plan, and normalization guidance for the upstream Quran data.
 - `docs/frontend-architecture.md`: Frontend direction, route map, and implementation boundaries.
 

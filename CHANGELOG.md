@@ -14,6 +14,12 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - Expanded the QuranKit CLI with local-first private study state, `progress`, `bookmark`, `note`, `plan`, and `export` commands, ayah-range parsing, authenticated optional remote study-state mode, attribution-safe surah export, and pytest coverage for private workflow behavior.
 - Added the first `apps/cli` Typer package scaffold with persisted configuration, remote API and local SQLite backend selection, and initial `qurankit config show/set` commands.
 - Expanded the QuranKit CLI with `surah`, `ayah`, `juz`, `random`, `search`, and `semantic` commands, shared `--json` and translation controls, remote/local backend execution, attribution-aware output, and Typer coverage for lookup, exact search, and textual-similarity search behavior.
+- Added the first `apps/api` FastAPI backend with versioned health, structured error envelopes, request IDs, and generated OpenAPI metadata.
+- Added normalized SQLAlchemy models, Alembic migrations, source provenance seed flows, and private-by-default reading-state tables for QuranKit's backend schema foundation.
+- Added a locked-source normalization pipeline with checksum validation, exact-text loading, human-readable validation output, and SQLite, JSON, and PostgreSQL export generation.
+- Added database-backed Quran browse endpoints for surahs, ayahs, juz, hizb, pages, and random ayah lookup with source attribution and backend pytest coverage.
+- Added an exact-search API with Arabic, simple-text, and translation filters, normalized search columns and indexes, result pagination, attribution-aware highlights, and exact-search pytest coverage.
+- Added repository backend scripts and docs for migrations, source metadata seeding, data loading, backend pytest, and data-validation flows.
 - Bootstrapped the `apps/web` Next.js frontend foundation with Arabic-inspired theme tokens, shared layout components, and route scaffolding for browse, reader, search, semantic search, progress, plans, bookmarks, notes, and settings.
 - Added an attributed Quran reader preview using a small sample from AlQuran.Cloud and a shared semantic-search disclaimer that keeps similarity search clearly separated from tafsir, fatwa, and religious rulings.
 - Added `docs/frontend-architecture.md`, a public npm registry config for reproducible installs, and Vitest coverage for route architecture, reader attribution, and semantic-search guardrails.

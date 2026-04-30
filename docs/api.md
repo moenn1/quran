@@ -1,11 +1,16 @@
 # QuranKit API
 
-QuranKit's production API is not implemented yet, but the repository now defines one contract surface for the CLI, web app, self-hosting docs, and release checks.
+QuranKit's API currently exists in two layers:
+
+- the bootstrap Docker service used by self-hosting docs and smoke checks
+- the database-backed `apps/api` FastAPI service used for active backend development
 
 ## Current Status
 
 - The bootstrap Docker service only exposes `GET /` and `GET /health` today.
-- The versioned `/api/v1/...` routes below describe the target production contract and the surface the CLI expects in `mode=remote`.
+- The versioned `/api/v1/...` routes remain the long-term production contract and the surface the CLI expects in `mode=remote`.
+- `apps/api` now implements versioned health, browse, and exact-search endpoints against a migrated QuranKit database.
+- `/api/v1/search/semantic` and authenticated `/api/v1/me/study` endpoints remain planned contract surfaces and are not implemented in `apps/api` yet.
 - Use [docs/self-hosting.md](self-hosting.md), [docs/semantic-search.md](semantic-search.md), and [docs/reading-tracker.md](reading-tracker.md) for the operational details that sit around this contract.
 
 ## Design Rules
@@ -33,172 +38,151 @@ Example bootstrap health response:
 }
 ```
 
-## Planned Versioned Contract
+## Implemented Development API (`apps/api`)
 
-### Public Read Endpoints
+Current database-backed endpoints:
 
-| Method | Path | Purpose |
-| --- | --- | --- |
-| `GET` | `/api/v1/surahs/{surahNumber}` | Surah metadata and ayah rows, with optional translation selection |
-| `GET` | `/api/v1/ayahs/{surah}:{ayah}` | One ayah with metadata and attribution |
-| `GET` | `/api/v1/juzs/{juzNumber}` | Juz range metadata and ayah rows |
-| `GET` | `/api/v1/ayahs/random` | One random ayah with attribution |
-| `GET` | `/api/v1/search/exact` | Exact-match search over Arabic text and optional translation text |
-| `GET` | `/api/v1/search/semantic` | Related passages ranked by textual similarity, never interpretation |
+- `GET /`
+- `GET /api/v1/health`
+- `GET /api/v1/surahs`
+- `GET /api/v1/surahs/{surah_number}`
+- `GET /api/v1/surahs/{surah_number}/ayahs`
+- `GET /api/v1/ayahs/{reference}`
+- `GET /api/v1/ayahs/random`
+- `GET /api/v1/juz/{number}`
+- `GET /api/v1/hizb/{number}`
+- `GET /api/v1/pages/{number}`
+- `GET /api/v1/search/exact`
+- `GET /docs`
+- `GET /openapi.json`
 
-Shared query parameters:
+## Browse Contract Notes
 
-- `translation`: optional edition identifier such as `en.sahih`
-- `limit`: optional maximum result count for search endpoints
+- Browse endpoints require `QURANKIT_DATABASE_URL` plus a migrated and loaded database.
+- Surah list pagination defaults to `limit=114` and `offset=0`.
+- Ayah collection endpoints default to `limit=50` and `offset=0`, with a maximum `limit=200`.
+- Quran browse responses include source attribution fields from the locked upstream release metadata.
+- The browse API returns stored Quran text exactly as loaded from source. If the source row contains a BOM artifact, that byte-order mark remains present in the returned text.
 
-### Authenticated Private Endpoints
+## Ayah References
 
-| Method | Path | Purpose |
-| --- | --- | --- |
-| `GET` | `/api/v1/me/study` | Read the authenticated user's study-state document |
-| `PUT` | `/api/v1/me/study` | Replace the authenticated user's study-state document |
+`GET /api/v1/ayahs/{reference}` accepts two formats:
 
-Those endpoints are expected to carry progress, plans, bookmarks, and notes in one private payload and require `Authorization: Bearer <token>`.
+- global ayah number: `1`
+- surah-local reference: `2:255`
 
-## Example Contract Payloads
+Invalid formats return QuranKit's structured `422` error envelope with code `invalid_ayah_reference`.
 
-The examples below are illustrative contract shapes. They are not the live output of the bootstrap container.
+## Error Format
 
-### Exact Search
-
-`GET /api/v1/search/exact?q=guide&translation=en.sahih&limit=5`
+Non-2xx responses use a consistent QuranKit error envelope:
 
 ```json
 {
-  "query": "guide",
-  "match_type": "exact",
-  "count": 1,
-  "searched_fields": ["arabic_text", "translation"],
-  "results": [
-    {
-      "ayah": {
-        "reference": "1:6",
-        "surah_number": 1,
-        "ayah_number": 6,
-        "surah_name_arabic": "<source-preserved surah name>",
-        "surah_name_english": "Al-Fatihah",
-        "arabic_text": "<source-preserved ayah text>",
-        "translation_text": "<selected translation text>"
-      },
-      "match_sources": ["translation"]
+  "error": {
+    "code": "not_found",
+    "message": "Route not found.",
+    "details": {
+      "method": "GET",
+      "path": "/api/v1/missing"
     }
-  ],
-  "arabic_source": {
-    "repository": "AbdullahGhanem/quran-database",
-    "snapshot": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
-    "note": "Arabic Quran text is shown exactly as stored in the configured QuranKit backend."
   },
-  "translation_attribution": {
-    "identifier": "en.sahih",
-    "language": "en",
-    "english_name": "Saheeh International",
-    "edition_type": "translation",
-    "format": "text"
+  "meta": {
+    "request_id": "req-404"
   }
 }
 ```
+
+`X-Request-ID` is echoed in both the response header and the error body so logs and client traces can be correlated.
+
+Browse- and search-specific errors use the same envelope with QuranKit-specific codes such as:
+
+- `database_unavailable`
+- `surah_not_found`
+- `ayah_not_found`
+- `juz_not_found`
+- `hizb_not_found`
+- `page_not_found`
+- `invalid_ayah_reference`
+- `invalid_search_query`
+- `invalid_search_field`
+- `translation_not_found`
+- `unsupported_search_edition`
+
+## Exact Search Contract
+
+`GET /api/v1/search/exact` accepts:
+
+- `q`: required exact substring query after QuranKit whitespace normalization
+- `field`: optional repeated filter with `arabic_text`, `simple_text`, `normalized_text` (alias of `simple_text`), or `translation`
+- `language`: optional edition language code filter such as `en` or `ar`
+- `translation`: optional upstream edition identifier such as `en.sahih` or `quran-simple`
+- `limit`: defaults to `20`, max `100`
+- `offset`: defaults to `0`
+
+Search behavior:
+
+- When no field filter is provided, QuranKit searches Arabic source text, simple-text Quran editions, and translations.
+- When `language` is provided without fields, the search defaults to edition-backed fields only.
+- When `translation` is provided without fields, the search defaults to the one supported field for that edition type:
+  - `translation` for translation editions
+  - `simple_text` for Quran simple-text editions
+- Results are deduplicated at the ayah level, paginated in canonical ayah order, and include per-field highlight excerpts where a match was found.
+
+Exact-search responses include:
+
+- `query`, `match_type`, `count`, and `searched_fields`
+- normalized `filters`
+- `results[].ayah` with exact-source Quran text and source attribution
+- `results[].match_sources`
+- `results[].highlights` with excerpt spans and edition attribution where relevant
+- `pagination`
+- top-level `arabic_source`
+- `translation_attribution` when the request is scoped to one translation edition
+- `edition_attributions` for the edition rows represented in the current page
+
+## Planned Contract Surfaces
 
 ### Semantic Search
 
-`GET /api/v1/search/semantic?q=guide+path&translation=en.sahih&limit=5`
-
-```json
-{
-  "query": "guide path",
-  "match_type": "semantic_similarity",
-  "count": 2,
-  "disclaimer": "Related passages are ranked by textual similarity only. They are not tafsir, fatwa, or religious rulings.",
-  "results": [
-    {
-      "ayah": {
-        "reference": "1:6",
-        "surah_number": 1,
-        "ayah_number": 6,
-        "surah_name_english": "Al-Fatihah",
-        "arabic_text": "<source-preserved ayah text>",
-        "translation_text": "<selected translation text>"
-      },
-      "similarity_score": 0.842,
-      "reason": "Shared terms in the selected text: guide, path."
-    }
-  ],
-  "arabic_source": {
-    "repository": "AbdullahGhanem/quran-database",
-    "snapshot": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
-    "note": "Arabic Quran text is shown exactly as stored in the configured QuranKit backend."
-  },
-  "translation_attribution": {
-    "identifier": "en.sahih",
-    "language": "en",
-    "english_name": "Saheeh International",
-    "edition_type": "translation",
-    "format": "text"
-  }
-}
-```
+- `GET /api/v1/search/semantic` remains a planned endpoint for related passages ranked by textual similarity only, never interpretation.
+- Semantic-search responses must keep the disclaimer explicit: related passages are similarity-ranked text matches, not tafsir, fatwa, or religious rulings.
+- Planned responses should include `query`, `match_type`, `disclaimer`, `results`, `arabic_source`, `translation_attribution`, and optional similarity scores.
 
 ### Private Study State
 
-`GET /api/v1/me/study`
+- `GET /api/v1/me/study` and `PUT /api/v1/me/study` remain contract-first endpoints for private reading progress, plans, bookmarks, and notes.
+- Those endpoints are expected to carry progress, plans, bookmarks, and notes in one private payload and require `Authorization: Bearer <token>`.
+- They should reuse QuranKit's structured error envelope and send cache headers that prevent shared caching.
 
-```http
-Authorization: Bearer <token>
-Accept: application/json
+## Local Run
+
+```bash
+cd apps/api
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+uvicorn qurankit_api.main:app --reload
 ```
 
-```json
-{
-  "state": {
-    "progress": {
-      "range": {
-        "start": { "surah_number": 1, "ayah_number": 1 },
-        "end": { "surah_number": 1, "ayah_number": 7 },
-        "label": "1:1-7"
-      },
-      "updated_at": "2026-04-30T00:00:00+00:00",
-      "source": "manual_mark"
-    },
-    "bookmarks": [
-      {
-        "id": "bookmark-id",
-        "range": {
-          "start": { "surah_number": 2, "ayah_number": 255 },
-          "end": { "surah_number": 2, "ayah_number": 255 },
-          "label": "2:255"
-        },
-        "label": "Evening review",
-        "created_at": "2026-04-30T00:00:00+00:00"
-      }
-    ],
-    "notes": [],
-    "plans": []
-  }
-}
-```
+Useful URLs after startup:
 
-## Error Model, Auth, and Caching
+- `http://127.0.0.1:8000/`
+- `http://127.0.0.1:8000/api/v1/health`
+- `http://127.0.0.1:8000/api/v1/surahs`
+- `http://127.0.0.1:8000/api/v1/ayahs/1`
+- `http://127.0.0.1:8000/api/v1/ayahs/2:255`
+- `http://127.0.0.1:8000/api/v1/search/exact?q=book&translation=en.sahih`
+- `http://127.0.0.1:8000/docs`
+- `http://127.0.0.1:8000/openapi.json`
 
-- Return JSON errors with at least `status` and `message`. `code` and `details` are recommended when validation fails.
-- Return `401` or `403` when `/api/v1/me/study` is requested without a valid token.
-- Return `404` when a surah, ayah, juz, edition, or search resource does not exist.
-- Return `422` when references, ranges, or search parameters are structurally invalid.
-- Treat `/api/v1/me/study` as private user state and send cache headers that prevent shared caching.
-- Public read endpoints may be cached, but attribution fields and semantic-search disclaimer fields must remain intact.
+## Safety Defaults
 
-Recommended error shape:
-
-```json
-{
-  "status": "validation_error",
-  "message": "Ayah reference must look like SURAH:AYAH.",
-  "code": "invalid_reference"
-}
-```
+- Quran text preservation is enforced in the data pipeline and browse API by returning the stored source text without local rewriting.
+- Source attribution remains required for Quran text, translations, and sourced metadata.
+- Semantic search is described as textual similarity only, not tafsir, fatwa, or religious ruling.
+- Bookmarks, notes, and reading progress remain private-by-default requirements for future authenticated endpoints.
 
 ## Limitations Before Release
 

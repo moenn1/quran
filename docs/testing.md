@@ -16,6 +16,21 @@ QuranKit needs layered verification across repository quality, backend behavior,
 - Unit tests should cover parsers, service objects, validation logic, and API handlers.
 - Integration tests should run against PostgreSQL for persistence, privacy defaults, and attribution behavior.
 - Contract tests should verify exact-search responses, source attribution, and clear semantic-search disclaimers.
+- The current backend baseline lives in `apps/api`.
+- `./scripts/run-backend-tests.sh` prefers `.venv/bin/python` when it exists, falls back to `apps/api/.venv/bin/python` or `python3`, and runs `python -m pytest` in `apps/api`.
+
+The current API test suite covers:
+
+- service metadata at `GET /`
+- health reporting at `GET /api/v1/health`
+- QuranKit error envelopes for `404`, `405`, and `500` responses
+- generated OpenAPI metadata and the published health contract
+- Alembic migration application against a temporary SQLite database
+- ORM-level constraint checks for ayah metadata ranges, translation review gating, privacy defaults, and semantic embedding targeting rules
+- source metadata seed idempotency for the evaluated upstream snapshot
+- locked-source validation, normalized load, and export coverage using a zipped SQL fixture
+- browse endpoint coverage for surah, ayah, juz, hizb, page, random lookup, invalid ayah references, and database-unavailable error handling
+- exact-search endpoint coverage for field selection, edition filters, language filters, pagination, highlights, and invalid query handling
 
 ## CLI
 
@@ -39,6 +54,16 @@ QuranKit needs layered verification across repository quality, backend behavior,
 - Reject unexpected text mutations, incomplete ayah ranges, or missing source metadata.
 - Track validation outputs in reproducible scripts rather than ad hoc manual steps.
 - The current baseline includes `scripts/analyze_upstream_quran_sql.py`, `docs/upstream/quran-database-summary.json`, and `tests/test_analyze_upstream_quran_sql.py` as the first reproducible data-validation path.
+- `./scripts/run-data-validation.sh` prefers `.venv/bin/python` when it exists, falls back to `apps/api/.venv/bin/python` or `python3`, and runs `python -m qurankit_api.data.pipeline validate` when `apps/api` exists. If the backend package is absent, it falls back to the repository analyzer test.
+
+The current validation workflow checks the locked upstream dataset for:
+
+- 114 surahs
+- 6236 ayahs
+- sequential global ayah numbering
+- sequential ayah numbering inside each surah
+- expected page, juz, hizb, and rub el hizb ranges
+- complete per-edition ayah coverage
 
 ## End-to-End
 
@@ -55,4 +80,4 @@ QuranKit needs layered verification across repository quality, backend behavior,
 - `./scripts/run-e2e.sh`
 - `./scripts/smoke-compose.sh`
 
-Some commands intentionally no-op until their corresponding codebases exist. The CLI target now runs `python -m pytest` in `apps/cli`, while the remaining placeholders should be replaced as their codebases land.
+The backend and CLI targets run today. Some remaining commands still intentionally no-op until their corresponding codebases exist, but `./scripts/run-backend-tests.sh` now executes the `apps/api` pytest suite and `./scripts/run-cli-tests.sh` continues to run `python -m pytest` in `apps/cli`.
