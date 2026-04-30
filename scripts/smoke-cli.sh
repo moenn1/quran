@@ -3,25 +3,7 @@
 set -eu
 
 ROOT_DIR=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
-
-choose_python() {
-  if [ -x "$ROOT_DIR/.venv/bin/python" ]; then
-    printf '%s\n' "$ROOT_DIR/.venv/bin/python"
-    return 0
-  fi
-
-  if command -v python3 >/dev/null 2>&1; then
-    command -v python3
-    return 0
-  fi
-
-  if command -v python >/dev/null 2>&1; then
-    command -v python
-    return 0
-  fi
-
-  return 1
-}
+. "$ROOT_DIR/scripts/lib/cli-python.sh"
 
 if [ ! -f "$ROOT_DIR/apps/cli/pyproject.toml" ]; then
   echo "No CLI smoke target found; skipping."
@@ -35,14 +17,14 @@ fi
 
 if ! "$PYTHON_BIN" -c "import qurankit, typer" >/dev/null 2>&1; then
   echo "CLI smoke target found in apps/cli, but the active Python environment is missing Qurankit or Typer." >&2
-  echo "Install CLI dev dependencies with: cd \"$ROOT_DIR\" && \"$PYTHON_BIN\" -m pip install -e 'apps/cli[dev]'" >&2
+  print_cli_dev_install_hint "$PYTHON_BIN"
   exit 1
 fi
 
 CLI_BIN="$(dirname "$PYTHON_BIN")/qurankit"
 if [ ! -x "$CLI_BIN" ]; then
   echo "CLI smoke target found in apps/cli, but the qurankit console script is not installed for $PYTHON_BIN." >&2
-  echo "Install CLI dev dependencies with: cd \"$ROOT_DIR\" && \"$PYTHON_BIN\" -m pip install -e 'apps/cli[dev]'" >&2
+  print_cli_dev_install_hint "$PYTHON_BIN"
   exit 1
 fi
 
