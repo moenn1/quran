@@ -205,10 +205,12 @@ The current QuranKit data pipeline now operates against the locked `quran.sql.zi
 Current implementation details:
 
 - exact-source Quran text is stored in canonical `ayahs.text`
+- search-only normalized lookup text is stored separately in `ayahs.search_text` and `ayah_translations.search_text`
 - the upstream BOM on the first ayah is preserved and marked in row metadata instead of being silently stripped
 - `hizb_id` is normalized into both `hizb_number` (`1..60`) and `rub_el_hizb_number` (`1..240`)
 - edition rows are imported with source attribution and kept non-public by default until attribution review is complete
 - source provenance records include both the downloaded `quran.sql.zip` artifact and the extracted `quran.sql` payload checksum
+- exact-search indexes are created on the normalized search columns, with PostgreSQL trigram indexes added when the database dialect supports them
 
 ## Recommendation
 
@@ -236,7 +238,7 @@ The current backend scaffold now includes the first normalized application schem
 - `surahs` stores canonical surah metadata keyed by `surah_number`.
 - `ayahs` stores canonical ayah rows keyed by `global_ayah_number` with `ayah_number`, `page_number`, `juz_number`, `hizb_number`, `rub_el_hizb_number`, and exact-source text checksums.
 - `translations` stores translation metadata, attribution fields, rights-review fields, and a public-exposure gate.
-- `ayah_translations` stores per-ayah translation text with upstream row provenance and exact-text checksums.
+- `ayah_translations` stores per-ayah translation or simple-text edition rows with upstream provenance, exact-text checksums, and search-only normalized text.
 
 Schema guardrails currently enforced in the database layer include:
 

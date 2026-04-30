@@ -14,6 +14,7 @@
 - `GET /api/v1/juz/{number}` lists ayahs in a normalized juz number.
 - `GET /api/v1/hizb/{number}` lists ayahs in a normalized hizb number (`1..60`).
 - `GET /api/v1/pages/{number}` lists ayahs on a mushaf page.
+- `GET /api/v1/search/exact` runs exact matching across Arabic source text, simple-text Quran editions, and translations.
 - `GET /docs` serves Swagger UI.
 - `GET /openapi.json` serves the generated OpenAPI document.
 
@@ -64,6 +65,39 @@ Browse-specific errors use the same envelope with QuranKit-specific codes such a
 - `juz_not_found`
 - `hizb_not_found`
 - `page_not_found`
+- `invalid_search_query`
+- `invalid_search_field`
+- `translation_not_found`
+- `unsupported_search_edition`
+
+## Exact Search Contract
+
+`GET /api/v1/search/exact` accepts:
+
+- `q`: required exact substring query after QuranKit whitespace normalization
+- `field`: optional repeated filter with `arabic_text`, `simple_text`, `normalized_text` (alias of `simple_text`), or `translation`
+- `language`: optional edition language code filter such as `en` or `ar`
+- `translation`: optional upstream edition identifier such as `en.sahih` or `quran-simple`
+- `limit`: defaults to `20`, max `100`
+- `offset`: defaults to `0`
+
+Search behavior:
+
+- When no field filter is provided, QuranKit searches Arabic source text, simple-text Quran editions, and translations.
+- When `language` is provided without fields, the search defaults to edition-backed fields only.
+- When `translation` is provided without fields, the search defaults to the one supported field for that edition type:
+  - `translation` for translation editions
+  - `simple_text` for Quran simple-text editions
+- Results are deduplicated at the ayah level, paginated in canonical ayah order, and include per-field highlight excerpts where a match was found.
+
+Exact-search responses include:
+
+- `searched_fields` and normalized `filters`
+- `results[].ayah` with exact-source Quran text and source attribution
+- `results[].highlights` with excerpt spans and edition attribution where relevant
+- top-level `arabic_source`
+- `translation_attribution` when the request is scoped to one translation edition
+- `edition_attributions` for the edition rows represented in the current page
 
 ## Local Run
 
@@ -83,6 +117,7 @@ Useful URLs after startup:
 - `http://127.0.0.1:8000/api/v1/surahs`
 - `http://127.0.0.1:8000/api/v1/ayahs/1`
 - `http://127.0.0.1:8000/api/v1/ayahs/2:255`
+- `http://127.0.0.1:8000/api/v1/search/exact?q=book&translation=en.sahih`
 - `http://127.0.0.1:8000/docs`
 - `http://127.0.0.1:8000/openapi.json`
 

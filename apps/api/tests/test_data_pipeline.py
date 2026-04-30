@@ -12,7 +12,7 @@ from qurankit_api.data.pipeline import (
     validate_upstream_artifact,
 )
 from qurankit_api.db import create_engine_from_url, create_session_factory
-from qurankit_api.models import Ayah, SourceFile, Surah, Translation
+from qurankit_api.models import Ayah, AyahTranslation, SourceFile, Surah, Translation
 
 from tests.support.sample_dataset import SAMPLE_EXPECTATIONS, write_sample_zip
 
@@ -68,6 +68,7 @@ def test_load_normalized_dataset_inserts_rows_and_source_files(
         ayah = session.get(Ayah, 1)
         assert ayah is not None
         assert ayah.text.startswith("\ufeff")
+        assert ayah.search_text == "بِسْمِ ٱللَّهِ"
         assert ayah.hizb_number == 1
 
         translation = session.scalar(
@@ -75,6 +76,11 @@ def test_load_normalized_dataset_inserts_rows_and_source_files(
         )
         assert translation is not None
         assert translation.attribution_url == "https://github.com/AbdullahGhanem/quran-database"
+        ayah_translation = session.scalar(
+            select(AyahTranslation).where(AyahTranslation.source_ayah_edition_id == 1),
+        )
+        assert ayah_translation is not None
+        assert ayah_translation.search_text == "in the name of allah"
 
         source_files = session.scalars(select(SourceFile).order_by(SourceFile.artifact_name)).all()
         assert [source_file.artifact_name for source_file in source_files] == [

@@ -7,6 +7,7 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from qurankit_api.core.search import normalize_search_text
 from qurankit_api.models import (
     Ayah,
     AyahTranslation,
@@ -65,6 +66,7 @@ def _ayah(session: Session, source_release: SourceRelease, surah: Surah) -> Ayah
         source_ayah_id=1,
         ayah_number=1,
         text="بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+        search_text=normalize_search_text("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"),
         text_sha256=_sha256("بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"),
         page_number=1,
         juz_number=1,
@@ -149,6 +151,7 @@ def test_ayah_metadata_ranges_are_enforced(db_session: Session) -> None:
             source_ayah_id=2,
             ayah_number=2,
             text="الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+            search_text=normalize_search_text("الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ"),
             text_sha256=_sha256("الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ"),
             page_number=605,
             juz_number=1,
@@ -193,6 +196,9 @@ def test_semantic_embeddings_require_exactly_one_target(db_session: Session) -> 
         source_release_id=source_release.id,
         source_ayah_edition_id=1,
         text="In the name of Allah, the Entirely Merciful, the Especially Merciful.",
+        search_text=normalize_search_text(
+            "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
+        ),
         text_sha256=_sha256(
             "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
         ),

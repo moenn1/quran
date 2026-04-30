@@ -24,6 +24,7 @@ The current API test suite covers:
 - Source metadata seed idempotency for the evaluated upstream snapshot
 - Locked-source validation, normalized load, and export coverage using a zipped SQL fixture
 - Browse endpoint coverage for surah, ayah, juz, hizb, page, random lookup, invalid ayah references, and database-unavailable error handling
+- Exact-search endpoint coverage for field selection, edition filters, language filters, pagination, highlights, and invalid query handling
 
 The current validation workflow checks the real upstream artifact for:
 
@@ -34,4 +35,4 @@ The current validation workflow checks the real upstream artifact for:
 - expected page, juz, hizb, and rub el hizb ranges
 - complete per-edition ayah coverage
 
-Future backend issues should extend this foundation with exact-search handlers, semantic-search contracts, authenticated personal-data endpoints, and richer attribution assertions as those layers land.
+Future backend issues should extend this foundation with semantic-search contracts, authenticated personal-data endpoints, and richer attribution assertions as those layers land.

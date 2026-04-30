@@ -61,6 +61,7 @@ Key endpoints:
 - `GET /api/v1/juz/{number}`
 - `GET /api/v1/hizb/{number}`
 - `GET /api/v1/pages/{number}`
+- `GET /api/v1/search/exact`
 - `GET /docs`
 - `GET /openapi.json`
 
@@ -106,5 +107,11 @@ The browse API now:
 - resolves ayahs by global number or `surah:ayah` reference
 - paginates surah, juz, hizb, and page browse responses
 - returns source attribution alongside Quran text responses
+
+The exact-search API now:
+
+- searches Arabic source text, simple-text Quran editions, and translations through `GET /api/v1/search/exact`
+- supports field filters, language filters, edition identifier filters, pagination, and excerpt highlights
+- returns source attribution for Quran text plus edition attribution for matched translation or simple-text rows
 
 Additional backend notes live in [docs/api.md](docs/api.md), [docs/database.md](docs/database.md), and [docs/testing.md](docs/testing.md).

@@ -69,6 +69,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 "name": "Quran Browse",
                 "description": "Read Quran browse data from the normalized QuranKit database.",
             },
+            {
+                "name": "Quran Search",
+                "description": (
+                    "Run exact, attribution-aware search queries across Quran text, "
+                    "simple-text editions, and translations."
+                ),
+            },
         ],
     )
     app.state.settings = app_settings

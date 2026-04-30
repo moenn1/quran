@@ -160,6 +160,7 @@ class Ayah(TimestampMixin, Base):
     source_ayah_id: Mapped[int] = mapped_column(Integer, nullable=False, unique=True)
     ayah_number: Mapped[int] = mapped_column(Integer, nullable=False)
     text: Mapped[str] = mapped_column(Text, nullable=False)
+    search_text: Mapped[str] = mapped_column(Text, nullable=False, index=True)
     text_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
     page_number: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     juz_number: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
@@ -280,6 +281,7 @@ class AyahTranslation(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     source_ayah_edition_id: Mapped[int] = mapped_column(Integer, nullable=False)
     text: Mapped[str] = mapped_column(Text, nullable=False)
+    search_text: Mapped[str] = mapped_column(Text, nullable=False, index=True)
     text_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
     metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
 

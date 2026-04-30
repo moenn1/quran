@@ -33,6 +33,7 @@ from qurankit_api.data.source_metadata import (
     edition_rights_notes,
     translation_id_for_upstream_edition,
 )
+from qurankit_api.core.search import normalize_search_text
 from qurankit_api.data.upstream_sql import iter_zip_sql_table_rows, read_dump_metadata
 from qurankit_api.db import resolve_database_url, session_scope
 from qurankit_api.db.seed import seed_source_metadata
@@ -90,6 +91,7 @@ AYAH_COLUMNS = [
     "source_ayah_id",
     "ayah_number",
     "text",
+    "search_text",
     "text_sha256",
     "page_number",
     "juz_number",
@@ -126,6 +128,7 @@ AYAH_TRANSLATION_COLUMNS = [
     "source_release_id",
     "source_ayah_edition_id",
     "text",
+    "search_text",
     "text_sha256",
     "metadata_json",
 ]
@@ -881,6 +884,7 @@ def normalized_ayah_rows(
                 "source_ayah_id": int(row["id"]),
                 "ayah_number": int(row["number_in_surah"]),
                 "text": text,
+                "search_text": normalize_search_text(text),
                 "text_sha256": _text_sha256(text),
                 "page_number": int(row["page"]),
                 "juz_number": int(row["juz_id"]),
@@ -963,6 +967,7 @@ def iter_normalized_ayah_translation_rows(
             "source_release_id": source_release_id,
             "source_ayah_edition_id": source_ayah_edition_id,
             "text": text,
+            "search_text": normalize_search_text(text),
             "text_sha256": _text_sha256(text),
             "metadata_json": _row_metadata(
                 row,
