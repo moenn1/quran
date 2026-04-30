@@ -9,6 +9,7 @@ QuranKit should not be tagged or promoted without passing the following checks.
 - `./scripts/smoke-compose.sh`
 - Updated `CHANGELOG.md`
 - Updated repository docs for any changed guarantees, setup, or guardrails
+- Updated `docs/api.md`, `docs/cli.md`, `docs/semantic-search.md`, and `docs/reading-tracker.md` when their contracts or wording changed
 - Updated source-evaluation and attribution docs when data inputs change
 - Verified Docker Compose configuration
 - Verified religious-safety and privacy guardrails
@@ -19,6 +20,7 @@ QuranKit should not be tagged or promoted without passing the following checks.
 - Is source attribution present and documented?
 - Are semantic-search features clearly labeled as textual similarity only?
 - Are bookmarks, notes, and reading progress private by default?
+- Do the API and CLI docs clearly distinguish the bootstrap stack from the future production contract?
 - Are README, API notes, CLI notes, and self-hosting docs consistent?
 
 ## GitHub Actions

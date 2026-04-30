@@ -38,6 +38,9 @@ for file in \
   docs/upstream/quran-database-summary.json \
   docs/api.md \
   docs/cli.md \
+  docs/semantic-search.md \
+  docs/reading-tracker.md \
+  docs/contributing.md \
   docs/release-readiness.md \
   scripts/analyze_upstream_quran_sql.py \
   scripts/lib/cli-python.sh \
@@ -66,11 +69,20 @@ assert_text docs/religious-safety.md "Do not alter Quran text."
 assert_text docs/religious-safety.md "Semantic search is textual similarity, not tafsir, fatwa, or religious ruling."
 assert_text docs/religious-safety.md "Bookmarks, notes, and reading progress must be private by default."
 assert_text docs/database.md "Attribution Requirements For QuranKit"
+assert_text docs/api.md 'The bootstrap Docker service only exposes `GET /` and `GET /health` today.'
+assert_text docs/api.md "/api/v1/search/semantic"
 assert_text docs/cli.md "python -m pip install -e 'apps/cli[dev]'"
 assert_text docs/cli.md "./scripts/smoke-cli.sh"
 assert_text docs/cli.md ".venv/bin/python"
 assert_text docs/cli.md "Keep bookmarks, notes, and reading progress private by default"
 assert_text docs/cli.md "Describe semantic search as textual similarity only"
+assert_text docs/cli.md "The Docker bootstrap API does not implement this contract yet."
+assert_text docs/semantic-search.md "textual similarity only"
+assert_text docs/semantic-search.md "docker compose --profile semantic-search up --build"
+assert_text docs/reading-tracker.md "/api/v1/me/study"
+assert_text docs/reading-tracker.md "Private by default does not mean encrypted"
+assert_text docs/contributing.md "./scripts/check-docs.sh"
+assert_text docs/contributing.md "./scripts/release-readiness.sh"
 assert_text docs/release-readiness.md "./scripts/smoke-cli.sh"
 assert_text docs/frontend-architecture.md "Semantic results must never be presented as tafsir, fatwa, or rulings."
 assert_text docs/testing.md "./scripts/run-e2e.sh"

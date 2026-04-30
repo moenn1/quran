@@ -18,6 +18,19 @@ The editable install exposes the `qurankit` command and the pytest dependencies 
 
 `./scripts/smoke-cli.sh` verifies the installed `qurankit` console script itself with a temporary config/data home so release checks cover the packaging path as well as the in-process pytest suite.
 
+## Quick Start
+
+```bash
+qurankit config show
+qurankit surah 1
+qurankit search mercy
+qurankit semantic guide path
+qurankit progress mark 1:1-7
+qurankit plan today
+```
+
+The CLI is usable in local-first mode now. Remote API mode is already documented, but it expects a future full QuranKit API contract rather than the current bootstrap container.
+
 ## Current Commands
 
 ### Configuration
@@ -109,6 +122,8 @@ The CLI also builds ayah-range validation from the surah endpoints so plan and p
 
 Responses should include Quran source attribution and selected translation attribution whenever Quran text is returned.
 
+The Docker bootstrap API does not implement this contract yet. It only exposes `/` and `/health` for self-hosting smoke checks, so `mode=remote` currently requires a compatible future QuranKit API deployment or a contract-matching stub.
+
 ### Local SQLite Mode
 
 `mode=local` reads directly from a SQLite file path.
@@ -142,6 +157,8 @@ This local-first path keeps private reading workflows available even when Quran 
 
 The CLI sends `Authorization: Bearer <token>` using the configured `api-token` or `QURANKIT_API_TOKEN`.
 
+The bootstrap Docker API does not provide these authenticated study-state endpoints yet. Treat them as the contract the CLI and future API must share.
+
 ## Ayah Range Format
 
 Private workflow commands accept:
@@ -161,6 +178,65 @@ Ranges are validated against the configured Quran backend before progress, bookm
 - `export surah` preserves Quran source attribution and selected translation attribution in both JSON and text output.
 - JSON payloads preserve attribution metadata so downstream scripts do not lose source context.
 
+## Example Workflows
+
+### Local-First Reading and Search
+
+```bash
+qurankit config set mode local
+qurankit config set db-path ~/qurankit/qurankit.sqlite3
+qurankit surah 1
+qurankit ayah 2:255
+qurankit search mercy --limit 10
+```
+
+### Remote API Contract
+
+```bash
+qurankit config set mode remote
+qurankit config set api-url https://api.example.test
+qurankit config set translation en.sahih
+qurankit search guide --json
+```
+
+Use this only against an API that implements the documented `/api/v1/...` contract in [docs/api.md](api.md).
+
+### Private Study Workflow
+
+```bash
+qurankit progress mark 2:255-257
+qurankit bookmark add 2:255 --label "Evening review"
+qurankit note add 2:255 "Reflect on trust in Allah"
+qurankit plan create "Week 1" 1:1-1:7 --daily 2
+qurankit plan today --plan "Week 1"
+```
+
+### Exports
+
+```bash
+qurankit export progress --output exports/progress.json
+qurankit export bookmarks --output exports/bookmarks.json
+qurankit export surah 1 --format text --output exports/surah-1.txt
+```
+
+## JSON Shape Highlights
+
+`qurankit progress --json` returns a storage summary together with progress counts:
+
+```json
+{
+  "storage": {
+    "mode": "local",
+    "summary": "Private local study state at /home/user/.local/share/qurankit/study-state.json",
+    "private_by_default": true
+  },
+  "progress": null,
+  "bookmark_count": 0,
+  "note_count": 0,
+  "plan_count": 0
+}
+```
+
 ## Religious Safety And Privacy
 
 - Show Quran text exactly as stored in the selected backend.
@@ -168,3 +244,18 @@ Ranges are validated against the configured Quran backend before progress, bookm
 - Keep exact search and semantic search distinct in both command names and output wording.
 - Describe semantic search as textual similarity only, never as tafsir, fatwa, or religious ruling.
 - Keep bookmarks, notes, and reading progress private by default.
+
+## Limitations and Operational Notes
+
+- `mode=remote` is contract-ready, but the repository's current Docker bootstrap API only proves `/` and `/health`.
+- `state-mode=remote` requires an authenticated `/api/v1/me/study` implementation and a valid bearer token.
+- `mode=local` expects a prepared SQLite file with `surahs` and `ayahs`, and also `editions` plus `ayah_edition` when translation-aware output is enabled.
+- Local private study state is stored as a JSON file under the configured study-state path. Private by default does not mean encrypted, so local filesystem permissions still matter.
+- The CLI's local semantic-search baseline currently uses textual-overlap heuristics over Arabic text and the selected translation. Future service implementations may change ranking internals without changing the user-facing disclaimer.
+
+## Related Docs
+
+- [docs/api.md](api.md)
+- [docs/semantic-search.md](semantic-search.md)
+- [docs/reading-tracker.md](reading-tracker.md)
+- [docs/self-hosting.md](self-hosting.md)
