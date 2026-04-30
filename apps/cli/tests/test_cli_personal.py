@@ -92,6 +92,29 @@ def test_bookmark_note_and_export_commands(
     assert export_payload["bookmarks"][0]["range"]["label"] == "1:6"
 
 
+def test_bookmark_remove_command_updates_private_state(
+    sample_sqlite_db: Path, tmp_path: Path
+) -> None:
+    env = _write_settings(tmp_path, mode=BackendMode.LOCAL, db_path=sample_sqlite_db)
+
+    add_result = runner.invoke(
+        app,
+        ["bookmark", "add", "112:1", "--label", "Evening", "--json"],
+        env=env,
+    )
+
+    bookmark_id = json.loads(add_result.stdout)["bookmark"]["id"]
+    remove_result = runner.invoke(app, ["bookmark", "remove", bookmark_id], env=env)
+    list_result = runner.invoke(app, ["bookmark", "--json"], env=env)
+
+    assert add_result.exit_code == 0
+    assert remove_result.exit_code == 0
+    assert list_result.exit_code == 0
+    assert f"Removed bookmark {bookmark_id}" in remove_result.stdout
+    assert "Privacy: private by default." in remove_result.stdout
+    assert json.loads(list_result.stdout)["count"] == 0
+
+
 def test_export_surah_writes_json_file(
     sample_sqlite_db: Path, tmp_path: Path
 ) -> None:

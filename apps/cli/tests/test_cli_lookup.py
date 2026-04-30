@@ -196,6 +196,69 @@ def test_search_command_uses_remote_mode(
     ]
 
 
+def test_semantic_command_uses_remote_mode(
+    monkeypatch, tmp_path: Path
+) -> None:
+    env = _write_settings(
+        tmp_path,
+        mode=BackendMode.REMOTE,
+        api_url="https://api.example.test",
+    )
+    requested_urls: list[str] = []
+    translation = TranslationAttribution(
+        identifier="en.sahih",
+        language="en",
+        name="Saheeh International",
+        english_name="Saheeh International",
+        edition_type="translation",
+        format="text",
+    )
+    sample_ayah = AyahRecord(
+        surah_number=113,
+        ayah_number=1,
+        surah_name_arabic="ٱلْفَلَقِ",
+        surah_name_english="Al-Falaq",
+        surah_name_translation="The Daybreak",
+        revelation_type="Meccan",
+        arabic_text="قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ",
+        translation_text="Say, I seek refuge in the Lord of daybreak.",
+        page_number=604,
+        juz_number=30,
+        hizb_number=60,
+        sajda=False,
+    )
+    payload = SemanticSearchResult(
+        query="seek refuge",
+        results=(
+            SemanticSearchHit(
+                ayah=sample_ayah,
+                similarity_score=0.82,
+                reason="Shared language about seeking refuge.",
+            ),
+        ),
+        translation_attribution=translation,
+    ).to_dict()
+
+    def opener(request, timeout):
+        requested_urls.append(request.full_url)
+        return StubResponse(payload)
+
+    monkeypatch.setattr("qurankit.backends.urlopen", opener)
+
+    result = runner.invoke(app, ["semantic", "seek", "refuge", "--json"], env=env)
+
+    assert result.exit_code == 0
+    response_payload = json.loads(result.stdout)
+    assert response_payload["count"] == 1
+    assert response_payload["disclaimer"].startswith(
+        "Related passages are ranked by textual similarity only."
+    )
+    assert response_payload["results"][0]["ayah"]["reference"] == "113:1"
+    assert requested_urls == [
+        "https://api.example.test/api/v1/search/semantic?q=seek+refuge&translation=en.sahih&limit=5"
+    ]
+
+
 def _write_settings(
     tmp_path: Path,
     *,

@@ -13,6 +13,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - Added interactive `/search` and `/semantic` web routes with bundled exact-match filtering, result context, similarity-preview controls, optional scores, and private bookmark/plan/copy actions.
 - Added `/explore`, `/surah/[number]`, and `/ayah/[surah]/[ayah]` to the web app with bundled routed surah samples, surah filtering, translation and text-view toggles, font controls, private study actions, attribution-safe copy behavior, and previous/next navigation.
 - Added interactive `/progress`, `/plans`, `/bookmarks`, `/notes`, and `/settings` study-state routes with local browser persistence, shared reader preferences, bundled-sample progress summaries, plan creation/recalculation, bookmark filtering, private note editing, JSON export previews, and deliberate local-data clearing.
+- Added Playwright browser coverage for the web search, reader, progress, and bookmark flows, including axe accessibility checks, responsive screenshot baselines, and a real `./scripts/run-e2e.sh` path backed by `apps/web/e2e`.
 - Added Tailwind and TanStack Query foundations to `apps/web`, including a shared app provider, API client utilities, PostCSS wiring, and a runtime foundation panel on the home route.
 - Expanded the QuranKit CLI with local-first private study state, `progress`, `bookmark`, `note`, `plan`, and `export` commands, ayah-range parsing, authenticated optional remote study-state mode, attribution-safe surah export, and pytest coverage for private workflow behavior.
 - Added the first `apps/cli` Typer package scaffold with persisted configuration, remote API and local SQLite backend selection, and initial `qurankit config show/set` commands.
@@ -41,3 +42,4 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - Unified `./scripts/run-cli-tests.sh` and `./scripts/smoke-cli.sh` on one shared Python-selection helper so CLI pytest and installed-entrypoint smoke checks stay aligned in clean environments.
 - Tightened repository documentation checks so CLI install instructions, CLI README scope, privacy wording, and semantic-search disclaimers stay aligned across the tracked docs.
 - Unified the API settings default, `.env.api.example`, Compose environment, and docs on the same semantic-search disclaimer text used by the live backend route.
+- Restored stable web unit coverage after adding browser tests by excluding Playwright specs from Vitest and pinning an in-memory `localStorage` shim for the study-state test harness.

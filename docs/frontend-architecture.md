@@ -19,6 +19,7 @@ The initial foundation lives in `apps/web` and establishes:
 - The API client defaults to `http://localhost:8000` and reads `NEXT_PUBLIC_API_URL` when the web app is pointed at another QuranKit API deployment.
 - Routed reader preference persistence so translation visibility, text-view defaults, and type scale changes survive refreshes and stay aligned with `/settings`.
 - Vitest coverage for reader attribution, semantic-search guardrails, explore filtering, exact-search filters, reader controls, and the new progress, plans, bookmarks, notes, and settings flows.
+- Playwright coverage for exact-search routing, semantic-search guardrails and bookmark persistence, reader-to-progress flows, axe accessibility checks, and responsive search/reader screenshots.
 
 ## Visual Direction
 
@@ -116,4 +117,4 @@ This sample powers the current `/explore`, `/surah/[number]`, and `/ayah/[surah]
 2. Map the browser-local study-state model onto the future authenticated `/api/v1/me/study` document without losing privacy cues, export boundaries, or reader-preference clarity.
 3. Expand private study actions from the reader into the exact-search and semantic-search result cards wherever those actions materially improve the workflow.
 4. Expand the browse and reader routes from the bundled sample to the broader validated QuranKit corpus.
-5. Add route-level accessibility and visual regression coverage once richer live-data interactions land.
+5. Expand the current Playwright coverage from bundled sample routes to future live-data reader, search, and authenticated sync flows without weakening the privacy and attribution guardrails already under test.
