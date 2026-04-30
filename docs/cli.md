@@ -157,7 +157,7 @@ This local-first path keeps private reading workflows available even when Quran 
 
 The CLI sends `Authorization: Bearer <token>` using the configured `api-token` or `QURANKIT_API_TOKEN`.
 
-The bootstrap Docker API does not provide these authenticated study-state endpoints yet. Treat them as the contract the CLI and future API must share.
+The database-backed `apps/api` service now provides these authenticated study-state endpoints together with register/login, progress, plan, bookmark, note, session, and export routes. The bootstrap Docker API used by Compose smoke checks still does not expose that private surface.
 
 ## Ayah Range Format
 

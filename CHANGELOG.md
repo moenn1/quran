@@ -24,6 +24,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - Added database-backed Quran browse endpoints for surahs, ayahs, juz, hizb, pages, and random ayah lookup with source attribution and backend pytest coverage.
 - Added an exact-search API with Arabic, simple-text, and translation filters, normalized search columns and indexes, result pagination, attribution-aware highlights, and exact-search pytest coverage.
 - Added a semantic-search API at `GET /api/v1/search/semantic` with the canonical similarity-only disclaimer, scoped filters, optional scores, context references, translation attribution, and backend pytest coverage.
+- Added password-based auth plus authenticated private-study API routes for `/api/v1/me/study`, progress checkpoints, reading sessions, khatm-style plan calculations, bookmarks, notes, scoped exports, and private delete flows, all backed by Alembic migrations and backend pytest coverage.
 - Added repository backend scripts and docs for migrations, source metadata seeding, data loading, backend pytest, and data-validation flows.
 - Bootstrapped the `apps/web` Next.js frontend foundation with Arabic-inspired theme tokens, shared layout components, and route scaffolding for browse, reader, search, semantic search, progress, plans, bookmarks, notes, and settings.
 - Added an attributed Quran reader preview using a small sample from AlQuran.Cloud and a shared semantic-search disclaimer that keeps similarity search clearly separated from tafsir, fatwa, and religious rulings.

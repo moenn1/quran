@@ -9,8 +9,8 @@ QuranKit's API currently exists in two layers:
 
 - The bootstrap Docker service only exposes `GET /` and `GET /health` today.
 - The versioned `/api/v1/...` routes remain the long-term production contract and the surface the CLI expects in `mode=remote`.
-- `apps/api` now implements versioned health, browse, exact-search, and semantic-search endpoints against a migrated QuranKit database.
-- Authenticated `/api/v1/me/study` endpoints remain planned contract surfaces and are not implemented in `apps/api` yet.
+- `apps/api` now implements versioned health, browse, exact-search, semantic-search, auth, and authenticated private-study endpoints against a migrated QuranKit database.
+- The bootstrap Docker service is still not a full `mode=remote` implementation for authenticated study state.
 - Use [docs/self-hosting.md](self-hosting.md), [docs/semantic-search.md](semantic-search.md), and [docs/reading-tracker.md](reading-tracker.md) for the operational details that sit around this contract.
 
 ## Design Rules
@@ -44,6 +44,8 @@ Current database-backed endpoints:
 
 - `GET /`
 - `GET /api/v1/health`
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/login`
 - `GET /api/v1/surahs`
 - `GET /api/v1/surahs/{surah_number}`
 - `GET /api/v1/surahs/{surah_number}/ayahs`
@@ -54,6 +56,16 @@ Current database-backed endpoints:
 - `GET /api/v1/pages/{number}`
 - `GET /api/v1/search/exact`
 - `GET /api/v1/search/semantic`
+- `GET /api/v1/me/study`
+- `PUT /api/v1/me/study`
+- `DELETE /api/v1/me/study`
+- `GET|PUT|DELETE /api/v1/me/progress`
+- `GET|POST|DELETE /api/v1/me/reading-sessions`
+- `GET|POST|DELETE /api/v1/me/bookmarks`
+- `GET|POST|PATCH|DELETE /api/v1/me/notes`
+- `GET|POST|PATCH|DELETE /api/v1/me/plans`
+- `GET /api/v1/me/plans/{plan_id}/today`
+- `GET /api/v1/me/exports/{scope}`
 - `GET /docs`
 - `GET /openapi.json`
 
@@ -180,13 +192,30 @@ The canonical disclaimer wording is:
 Related passages are ranked by textual similarity only. They are not tafsir, fatwa, or religious rulings.
 ```
 
-## Remaining Planned Contract Surfaces
+## Authenticated Private Study State
 
-### Private Study State
+`apps/api` now implements a password-based private study surface with opaque bearer tokens:
 
-- `GET /api/v1/me/study` and `PUT /api/v1/me/study` remain contract-first endpoints for private reading progress, plans, bookmarks, and notes.
-- Those endpoints are expected to carry progress, plans, bookmarks, and notes in one private payload and require `Authorization: Bearer <token>`.
-- They should reuse QuranKit's structured error envelope and send cache headers that prevent shared caching.
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/login`
+- `GET /api/v1/me/study`
+- `PUT /api/v1/me/study`
+- `DELETE /api/v1/me/study`
+- `GET|PUT|DELETE /api/v1/me/progress`
+- `GET|POST|DELETE /api/v1/me/reading-sessions`
+- `GET|POST|DELETE /api/v1/me/bookmarks`
+- `GET|POST|PATCH|DELETE /api/v1/me/notes`
+- `GET|POST|PATCH|DELETE /api/v1/me/plans`
+- `GET /api/v1/me/plans/{plan_id}/today`
+- `GET /api/v1/me/exports/{scope}`
+
+Private-study behavior:
+
+- `Authorization: Bearer <token>` is required for every `/api/v1/me/...` route.
+- `Cache-Control: private, no-store` is sent on private-study responses, including structured auth failures.
+- `PUT /api/v1/me/study` remains a full document replacement contract for the CLI's remote-study sync mode.
+- Granular progress, plan, bookmark, note, session, and export routes are implemented in the same service for web clients, tests, and manual API use.
+- Reading plans compute per-day targets from either an explicit `daily_ayah_target` or an inclusive `start_date`/`end_date` span, and they expose derived `today_range`, projected completion, and streak-oriented progress summaries.
 
 ## Local Run
 
@@ -216,12 +245,12 @@ Useful URLs after startup:
 - Quran text preservation is enforced in the data pipeline and browse API by returning the stored source text without local rewriting.
 - Source attribution remains required for Quran text, translations, and sourced metadata.
 - Semantic search is described as textual similarity only, not tafsir, fatwa, or religious rulings.
-- Bookmarks, notes, and reading progress remain private-by-default requirements for future authenticated endpoints.
+- Bookmarks, notes, reading progress, study exports, and session history remain private by default in the implemented authenticated endpoints.
 
 ## Limitations Before Release
 
 - The Docker bootstrap API is not a drop-in implementation of `mode=remote` yet.
-- Remote study-state sync is contract-first; the current Compose stack proves health and safety defaults, not a full authenticated API.
+- Remote study-state sync now works in `apps/api`, but the current Compose bootstrap stack still proves health and safety defaults rather than the full authenticated API surface.
 - Semantic search must be described as textual similarity only. The API must not frame those results as tafsir, fatwa, or religious interpretation.
 - The current similarity backend is deterministic textual ranking inside `apps/api`; optional vector infrastructure remains future self-hosting work.
 - Translation and audio exposure remain gated by attribution and rights review. See [docs/database.md](database.md).

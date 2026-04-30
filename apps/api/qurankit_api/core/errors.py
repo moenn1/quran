@@ -68,6 +68,10 @@ def error_response(
     details: Any | None = None,
 ) -> JSONResponse:
     request_id = get_request_id(request)
+    headers = {"X-Request-ID": request_id}
+    if getattr(request.state, "private_no_store", False):
+        headers["Cache-Control"] = "private, no-store"
+        headers["Pragma"] = "no-cache"
     return JSONResponse(
         status_code=status_code,
         content=build_error_envelope(
@@ -76,7 +80,7 @@ def error_response(
             message=message,
             details=details,
         ),
-        headers={"X-Request-ID": request_id},
+        headers=headers,
     )
 
 

@@ -30,7 +30,14 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     external_subject: Mapped[str | None] = mapped_column(String(255), unique=True)
     email: Mapped[str | None] = mapped_column(String(320), unique=True)
     display_name: Mapped[str | None] = mapped_column(String(255))
+    password_hash: Mapped[str | None] = mapped_column(String(255))
+    password_salt: Mapped[str | None] = mapped_column(String(255))
+    password_hash_iterations: Mapped[int | None] = mapped_column(Integer)
 
+    auth_tokens: Mapped[list["AuthToken"]] = relationship(
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
     reading_sessions: Mapped[list["ReadingSession"]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
@@ -52,6 +59,28 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+
+
+class AuthToken(UUIDPrimaryKeyMixin, TimestampMixin, Base):
+    __tablename__ = "auth_tokens"
+    __table_args__ = (
+        UniqueConstraint("token_hash", name="token_hash"),
+        CheckConstraint("length(token_hash) = 64", name="token_hash_length"),
+    )
+
+    user_id: Mapped[str] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    token_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+    token_prefix: Mapped[str] = mapped_column(String(32), nullable=False)
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    metadata_json: Mapped[dict[str, Any] | None] = mapped_column(JSON)
+
+    user: Mapped["User"] = relationship(back_populates="auth_tokens")
 
 
 class ReadingSession(UUIDPrimaryKeyMixin, PrivateByDefaultMixin, TimestampMixin, Base):
@@ -147,6 +176,10 @@ class ReadingPlan(UUIDPrimaryKeyMixin, PrivateByDefaultMixin, TimestampMixin, Ba
         nullable=False,
         index=True,
     )
+    completed_through_ayah_global_number: Mapped[int | None] = mapped_column(
+        ForeignKey("ayahs.global_ayah_number", ondelete="SET NULL"),
+        index=True,
+    )
     start_date: Mapped[date | None] = mapped_column(Date)
     end_date: Mapped[date | None] = mapped_column(Date)
     target_ayahs_per_day: Mapped[int | None] = mapped_column(Integer)
@@ -165,6 +198,9 @@ class ReadingPlan(UUIDPrimaryKeyMixin, PrivateByDefaultMixin, TimestampMixin, Ba
     end_ayah: Mapped["Ayah"] = relationship(
         back_populates="reading_plans_ending_here",
         foreign_keys=[end_ayah_global_number],
+    )
+    completed_through_ayah: Mapped["Ayah | None"] = relationship(
+        foreign_keys=[completed_through_ayah_global_number],
     )
 
 

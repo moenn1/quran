@@ -99,7 +99,7 @@ This browser-local model is still private by default. It is not synced to a serv
 
 The CLI sends `Authorization: Bearer <token>` using `qurankit config set api-token ...` or `QURANKIT_API_TOKEN`.
 
-The current bootstrap Docker API does not implement `/api/v1/me/study` yet. This is a shared contract for future API work, not a promise that the bootstrap stack already syncs private state.
+The database-backed `apps/api` service now implements `/api/v1/me/study` together with register/login plus authenticated session, progress, plan, bookmark, note, and export routes. The current bootstrap Docker API used by Compose smoke checks still does not expose that private surface.
 
 ## Study-State Shape
 
@@ -161,7 +161,7 @@ Illustrative payload:
 }
 ```
 
-For the remote contract, treat `PUT /api/v1/me/study` as a full document replacement unless and until the API explicitly documents patch semantics.
+For the remote contract, treat `PUT /api/v1/me/study` as a full document replacement. The more granular `apps/api` routes are additive conveniences for the web app, tests, and manual clients; they do not change the CLI's document-sync contract.
 
 The current web app keeps its richer local progress metadata in browser storage so it can power streaks, bundled-sample completion summaries, and reader defaults without implying that the authenticated API already supports those fields.
 
@@ -178,5 +178,5 @@ The current web app keeps its richer local progress metadata in browser storage 
 - The repository's working implementation is local-first, single-user JSON storage.
 - The web app currently stores its private study state in browser local storage and previews exports locally; it does not implement authenticated sync.
 - Local notes, plans, bookmarks, and progress are private by default, but they are not encrypted by the CLI.
-- Remote sync is contract-only until the production API is implemented.
+- Remote sync is implemented in `apps/api`, but the web app still keeps study state in browser local storage and the bootstrap Docker service still does not proxy the authenticated private API.
 - Exported private data should be handled carefully because JSON exports can be copied outside the user's private storage path.

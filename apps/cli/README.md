@@ -49,7 +49,7 @@ The editable install exposes the `qurankit` command and the pytest dependencies 
 - `mode=remote`: calls versioned QuranKit HTTP endpoints for surahs, ayahs, juzs, random ayahs, exact search, and semantic similarity search.
 - `mode=local`: reads directly from a SQLite file with upstream-style `surahs`, `ayahs`, `editions`, and `ayah_edition` tables.
 - `state-mode=local`: saves private progress, plans, bookmarks, and notes to a local JSON file. This is the default.
-- `state-mode=remote`: expects authenticated `GET` and `PUT` requests to `/api/v1/me/study` and uses the configured API token.
+- `state-mode=remote`: uses authenticated `GET` and `PUT` requests to `/api/v1/me/study` and the configured API token. The database-backed `apps/api` service now implements that document contract; the bootstrap Docker service used by smoke checks still does not.
 
 When translation output is enabled in local mode, the SQLite database must include `editions` metadata and the matching `ayah_edition` rows for the selected identifier.
 

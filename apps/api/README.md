@@ -17,6 +17,8 @@ The API now exposes:
 
 - `GET /`
 - `GET /api/v1/health`
+- `POST /api/v1/auth/register`
+- `POST /api/v1/auth/login`
 - `GET /api/v1/surahs`
 - `GET /api/v1/surahs/{surah_number}`
 - `GET /api/v1/surahs/{surah_number}/ayahs`
@@ -27,6 +29,16 @@ The API now exposes:
 - `GET /api/v1/pages/{number}`
 - `GET /api/v1/search/exact`
 - `GET /api/v1/search/semantic`
+- `GET /api/v1/me/study`
+- `PUT /api/v1/me/study`
+- `DELETE /api/v1/me/study`
+- `GET|PUT|DELETE /api/v1/me/progress`
+- `GET|POST|DELETE /api/v1/me/reading-sessions`
+- `GET|POST|DELETE /api/v1/me/bookmarks`
+- `GET|POST|PATCH|DELETE /api/v1/me/notes`
+- `GET|POST|PATCH|DELETE /api/v1/me/plans`
+- `GET /api/v1/me/plans/{plan_id}/today`
+- `GET /api/v1/me/exports/{scope}`
 - `GET /docs`
 - `GET /openapi.json`
 
@@ -38,6 +50,8 @@ It also now includes:
 - database-backed browse handlers that read normalized surah and ayah data from the configured QuranKit database
 - an exact-search API with field filters, edition filters, pagination, and attribution-aware highlights
 - a semantic-search API with similarity-only disclaimer wording, scoped filters, optional scores, context references, and source-preserving attribution
+- password-based account registration/login with opaque bearer tokens stored as hashed database records
+- authenticated private study-state routes for sessions, checkpoints, khatm-style plan calculations, streak summaries, bookmarks, notes, exports, and full document replacement for the CLI remote-sync contract
 
 Run the backend tests from the repository root with:
 

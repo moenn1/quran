@@ -66,6 +66,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 "description": "Lightweight API availability checks.",
             },
             {
+                "name": "Auth",
+                "description": "Private QuranKit account registration and login.",
+            },
+            {
                 "name": "Quran Browse",
                 "description": "Read Quran browse data from the normalized QuranKit database.",
             },
@@ -74,6 +78,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 "description": (
                     "Run exact, attribution-aware search queries across Quran text, "
                     "simple-text editions, and translations."
+                ),
+            },
+            {
+                "name": "Private Study",
+                "description": (
+                    "Authenticated reading sessions, progress, plans, bookmarks, "
+                    "notes, exports, and study-document sync."
                 ),
             },
         ],
