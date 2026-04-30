@@ -511,6 +511,420 @@ svg {
   gap: 0.35rem;
 }
 
+.reader-layout {
+  display: grid;
+  gap: 1rem;
+}
+
+.reader-layout--single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.reader-panel {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  padding: 1.15rem;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius-lg) + 0.2rem);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.reader-panel::before {
+  content: "";
+  display: block;
+  height: 0.28rem;
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0,
+      rgba(139, 106, 63, 0.12) 8%,
+      rgba(29, 95, 90, 0.42) 50%,
+      rgba(139, 106, 63, 0.12) 92%,
+      transparent 100%
+    );
+}
+
+.reader-panel--spacious {
+  gap: 1.15rem;
+}
+
+.reader-panel--support {
+  align-content: start;
+  background:
+    linear-gradient(160deg, rgba(29, 95, 90, 0.05), rgba(255, 255, 255, 0.68)),
+    var(--surface);
+}
+
+.reader-panel__header {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.reader-panel__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.reader-panel__meta span {
+  padding: 0.3rem 0.58rem;
+  border: 1px solid rgba(113, 85, 46, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.44);
+}
+
+.reader-control-panel {
+  display: grid;
+  gap: 0.95rem;
+  padding: 1rem;
+  border: 1px solid rgba(113, 85, 46, 0.18);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.44);
+}
+
+.reader-control-group {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.reader-control-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+}
+
+.reader-search-input {
+  width: 100%;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid rgba(113, 85, 46, 0.26);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.78);
+  font: inherit;
+  color: var(--ink);
+}
+
+.reader-search-input::placeholder {
+  color: var(--muted);
+}
+
+.reader-status {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.58;
+}
+
+.reader-status--compact {
+  font-size: 0.96rem;
+}
+
+.segmented-control {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.segmented-control__button,
+.reader-toggle,
+.action-button {
+  padding: 0.62rem 0.86rem;
+  border: 1px solid rgba(113, 85, 46, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.segmented-control__button--selected,
+.reader-toggle--selected,
+.action-button--selected {
+  border-color: rgba(29, 95, 90, 0.28);
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.segmented-control__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.surah-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 1rem;
+}
+
+.surah-tile {
+  display: grid;
+  gap: 0.9rem;
+  min-height: 100%;
+  padding: 1.05rem;
+  border: 1px solid rgba(113, 85, 46, 0.18);
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(160deg, rgba(139, 106, 63, 0.08), rgba(255, 255, 255, 0.82)),
+    rgba(255, 255, 255, 0.62);
+}
+
+.surah-tile__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.surah-tile__copy {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.surah-tile__title {
+  margin: 0;
+  font-size: 1.65rem;
+  line-height: 1.08;
+}
+
+.surah-tile__subtitle,
+.surah-tile__description {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.surah-tile__arabic {
+  margin: 0;
+  font-family: "Noto Naskh Arabic", serif;
+  font-size: clamp(1.9rem, 5vw, 2.9rem);
+  line-height: 1.45;
+  text-align: right;
+}
+
+.surah-tile__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.surah-tile__meta span {
+  padding: 0.35rem 0.58rem;
+  border: 1px solid rgba(113, 85, 46, 0.16);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.5);
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.surah-tile__actions,
+.reader-inline-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+}
+
+.reader-link,
+.reader-route-backlink {
+  width: fit-content;
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.reader-link--muted {
+  color: var(--warm);
+}
+
+.reader-empty-state {
+  display: grid;
+  gap: 0.55rem;
+  padding: 1rem;
+  border: 1px dashed rgba(113, 85, 46, 0.32);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.36);
+}
+
+.reader-attribution {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.reader-route-hero {
+  gap: 1rem;
+}
+
+.reader-route-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.reader-route-header__copy {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.reader-route-header__arabic {
+  margin: 0;
+  font-family: "Noto Naskh Arabic", serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  line-height: 1.48;
+  text-align: right;
+}
+
+.reader-route-header__stack {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: end;
+}
+
+.reader-route-header__meta {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.ayah-list--reader {
+  gap: 1rem;
+}
+
+.ayah-card--reader {
+  gap: 0.85rem;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.ayah-card--focus {
+  border-color: rgba(29, 95, 90, 0.38);
+  background:
+    linear-gradient(160deg, rgba(29, 95, 90, 0.08), rgba(255, 255, 255, 0.7)),
+    rgba(255, 255, 255, 0.64);
+}
+
+.ayah-card__topline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ayah-card__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ayah-card__reference {
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.ayah-card__focus-tag {
+  padding: 0.32rem 0.56rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ayah-card__arabic--reader {
+  font-size: var(--reader-arabic-size);
+  line-height: 1.88;
+}
+
+.ayah-card__arabic--lead {
+  color: var(--accent-strong);
+}
+
+.ayah-card__translation--reader {
+  max-width: 50rem;
+  font-size: var(--reader-translation-size);
+  line-height: 1.72;
+}
+
+.ayah-card__translation--lead {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.ayah-actions {
+  display: grid;
+  gap: 0.55rem;
+  padding-top: 0.3rem;
+  border-top: 1px solid rgba(113, 85, 46, 0.14);
+}
+
+.ayah-actions__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.action-button--link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.ayah-actions__status {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.route-pager {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+
+.route-pager__link {
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: calc(var(--radius-lg) + 0.2rem);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.route-pager__eyebrow {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-strong);
+}
+
+.route-pager__link strong {
+  font-size: 1.2rem;
+  line-height: 1.15;
+}
+
+.route-pager__link span:not(.route-pager__eyebrow) {
+  color: var(--muted);
+}
+
+.route-pager__link--static {
+  background: rgba(255, 255, 255, 0.52);
+}
+
 .attribution,
 .reader-preview__note,
 .site-footer p {
@@ -542,7 +956,8 @@ svg {
   .page-hero,
   .reader-preview,
   .semantic-notice,
-  .site-footer {
+  .site-footer,
+  .reader-panel {
     padding: 1.5rem;
   }
 
@@ -552,6 +967,11 @@ svg {
 
   .section-block {
     gap: 1.15rem;
+  }
+
+  .reader-layout {
+    grid-template-columns: minmax(0, 1.7fr) minmax(18rem, 0.95fr);
+    align-items: start;
   }
 }
 
@@ -576,20 +996,52 @@ svg {
   .reader-preview__surah-arabic {
     margin-left: 0;
   }
+
+  .surah-tile__header,
+  .reader-route-header,
+  .ayah-card__topline {
+    flex-direction: column;
+  }
+
+  .reader-route-header__stack {
+    justify-items: start;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .page-hero,
   .reader-preview,
   .semantic-notice,
-  .surface-card {
+  .surface-card,
+  .reader-panel,
+  .surah-tile,
+  .route-pager__link {
     animation: rise-in 520ms ease both;
   }
 
   .surface-card:hover,
-  .nav__link:hover {
+  .nav__link:hover,
+  .segmented-control__button:hover,
+  .reader-toggle:hover,
+  .action-button:hover,
+  .route-pager__link:hover,
+  .surah-tile:hover {
     transform: translateY(-1px);
   }
+}
+
+.reader-link:hover,
+.reader-route-backlink:hover,
+.ayah-card__reference:hover,
+.surface-card__link:hover {
+  color: var(--ink);
+}
+
+.segmented-control__button:hover,
+.reader-toggle:hover,
+.action-button:hover {
+  border-color: rgba(113, 85, 46, 0.42);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 @keyframes rise-in {

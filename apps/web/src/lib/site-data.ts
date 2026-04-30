@@ -11,8 +11,7 @@ export type ContentCard = {
 };
 
 export const navigationItems = [
-  { href: "/", label: "Browse" },
-  { href: "/reader", label: "Reader" },
+  { href: "/explore", label: "Explore" },
   { href: "/search", label: "Exact Search" },
   { href: "/semantic", label: "Semantic Search" },
   { href: "/progress", label: "Progress" },
@@ -24,9 +23,14 @@ export const navigationItems = [
 
 export const heroPills = {
   home: [
-    "Arabic-first reader",
+    "Explore and reader routes",
     "Private study data by default",
     "Similarity-based semantic search",
+  ],
+  explore: [
+    "Surah filtering",
+    "Bundled reader sample",
+    "Ayah detail routes",
   ],
   reader: [
     "Quran text stays primary",
@@ -72,12 +76,13 @@ export const heroPills = {
 
 export const homeFeatureCards: ContentCard[] = [
   {
-    title: "Reader",
+    title: "Explore",
     description:
-      "A surah-first reading surface that gives Arabic text the most space, keeps translation secondary, and keeps references easy to scan.",
-    footer: "Designed for calm, continuous reading on desktop and mobile.",
-    href: "/reader",
-    linkLabel: "Open the reader blueprint",
+      "Browse bundled sample surahs, filter by name or revelation place, and move directly into routed surah and ayah pages with visible attribution.",
+    footer:
+      "This route now carries the main user-facing browse flow while the wider reading corpus is being connected.",
+    href: "/explore",
+    linkLabel: "Open the explore route",
     tone: "warm",
   },
   {

@@ -11,10 +11,11 @@ The initial foundation lives in `apps/web` and establishes:
 - A Next.js App Router structure for the public browse and study surfaces.
 - A shared visual system in `src/app/globals.css` using parchment-toned surfaces, restrained geometric framing, accessible contrast, and a Tailwind utility layer for layout composition.
 - Reusable presentation components for the shell, page hero, section cards, semantic disclaimer, and attributed reader preview.
+- A routed explore flow in `/explore`, `/surah/[number]`, and `/ayah/[surah]/[ayah]` with bundled sample data, surah filtering, previous/next navigation, attribution-safe copy controls, and private-by-default study actions.
 - A root app provider with TanStack Query defaults and an API client layer that can target the QuranKit HTTP service without changing the current local-first study model.
 - The API client defaults to `http://localhost:8000` and reads `NEXT_PUBLIC_API_URL` when the web app is pointed at another QuranKit API deployment.
-- Route foundations for `/`, `/reader`, `/search`, `/semantic`, `/progress`, `/plans`, `/bookmarks`, `/notes`, and `/settings`.
-- Initial Vitest coverage for reader attribution, semantic-search guardrails, route architecture data, API client setup, and the runtime foundation panel.
+- Route foundations for `/`, `/explore`, `/surah/[number]`, `/ayah/[surah]/[ayah]`, `/reader`, `/search`, `/semantic`, `/progress`, `/plans`, `/bookmarks`, `/notes`, and `/settings`.
+- Initial Vitest coverage for reader attribution, semantic-search guardrails, route architecture data, explore filtering, bundled reader navigation, reader controls, API client setup, and the runtime foundation panel.
 
 ## Visual Direction
 
@@ -40,7 +41,10 @@ The initial foundation lives in `apps/web` and establishes:
 ## Route Architecture
 
 - `/`: Browse surface and architecture summary.
-- `/reader`: Reader-focused layout, attribution treatment, and Quran-text hierarchy.
+- `/explore`: Surah browse route with search, revelation-place filtering, and direct reader entry points.
+- `/surah/[number]`: Surah reader with translation visibility, text emphasis, font controls, attribution, and local study actions.
+- `/ayah/[surah]/[ayah]`: Ayah detail route with immediate context and previous/next verse navigation.
+- `/reader`: Compatibility redirect to `/explore` from the earlier scaffold route.
 - `/search`: Exact search structure with transparent filters and explainable matches.
 - `/semantic`: Similarity-based search guidance and guardrails.
 - `/progress`: Private-by-default reading progress architecture.
@@ -57,10 +61,13 @@ The initial foundation lives in `apps/web` and establishes:
 - `src/components/site-navigation.tsx`: Small client island for active navigation state.
 - `src/components/page-hero.tsx`: Route-level hero copy and pill metadata.
 - `src/components/section-card.tsx` and `section-deck.tsx`: Reusable content grids for architecture pages.
+- `src/components/explore-experience.tsx`: Client browse surface for bundled surah filtering and route entry points.
+- `src/components/reader-workspace.tsx`: Client reader surface for translation toggles, text-view controls, font scaling, copy/bookmark/read actions, and attribution.
 - `src/components/runtime-foundation.tsx`: Home-page status surface that exposes the current API base URL, query cache policy, and privacy-first study-state direction.
 - `src/components/reader-preview.tsx`: Attributed Quran-text sample used to define reader spacing and hierarchy.
 - `src/components/semantic-disclaimer.tsx`: Shared similarity-search guardrail copy.
 - `src/lib/site-data.ts`: Central source for route metadata, card content, and the attributed preview ayat.
+- `src/lib/reader-data.ts`: Bundled routed surah sample plus helpers for context windows and adjacent route navigation.
 - `src/lib/api/*`: Shared API client and query-client setup for live data integration.
 
 ## Data and State Direction
@@ -81,16 +88,16 @@ The initial foundation lives in `apps/web` and establishes:
 
 ## Sample Quran Text
 
-The current reader preview uses a small attributed sample from AlQuran.Cloud:
+The current routed reader sample uses small bundled excerpts with visible attribution:
 
-- Arabic text: Uthmani edition
-- English translation: Mohammed Marmaduke William Pickthall
+- Arabic text: Quran.com API, Uthmani script
+- English translation: Saheeh International via AlQuran.Cloud
 
-This is only for layout and attribution treatment until QuranKit's validated data pipeline is wired into the reader.
+This sample powers the current `/explore`, `/surah/[number]`, and `/ayah/[surah]/[ayah]` routes while QuranKit's broader validated reading corpus is being wired into the web app.
 
 ## Next Steps
 
-1. Add real reader data adapters for remote API mode and local SQLite mode.
-2. Introduce local persistence helpers for progress, bookmarks, notes, and plan state.
-3. Replace architecture-copy cards with live reader, search, and study interactions.
-4. Add route-level accessibility and visual regression coverage once interactive flows land.
+1. Replace the bundled sample in `src/lib/reader-data.ts` with real reader data adapters for remote API mode and local SQLite mode.
+2. Introduce local persistence helpers for progress, bookmarks, notes, and plan state so the reader actions survive refreshes.
+3. Expand the browse and reader routes from the bundled sample to the broader validated QuranKit corpus.
+4. Add route-level accessibility and visual regression coverage once richer live-data interactions land.

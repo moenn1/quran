@@ -12,7 +12,12 @@ export function SiteNavigation() {
   return (
     <nav className="nav" aria-label="Primary">
       {navigationItems.map((item) => {
-        const active = pathname === item.href;
+        const active =
+          pathname === item.href ||
+          (item.href === "/explore" &&
+            (pathname === "/reader" ||
+              pathname.startsWith("/surah/") ||
+              pathname.startsWith("/ayah/")));
 
         return (
           <Link

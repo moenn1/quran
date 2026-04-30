@@ -6,6 +6,7 @@ QuranKit needs layered verification across repository quality, backend behavior,
 
 - `./scripts/lint-repo.sh` checks shell syntax and bootstrap Python syntax.
 - `./scripts/check-docs.sh` enforces required files and repository guarantees such as the maintainer note, semantic-search disclaimer, privacy defaults, and release docs.
+- `./scripts/check-docs.sh` also requires the dedicated API, CLI, database, semantic-search, reading-tracker, and contributor docs so release notes and implementation docs do not drift apart.
 - `./scripts/check-docs.sh` also pins the CLI install path and CLI-facing safety wording so release docs do not drift from the tested setup.
 - `docker compose -f compose.yaml config` validates the self-hosting configuration.
 - `./scripts/smoke-compose.sh` boots the bootstrap stack under an isolated Compose project, checks the API and web endpoints, and shuts the stack down.
@@ -28,9 +29,9 @@ QuranKit needs layered verification across repository quality, backend behavior,
 ## Frontend
 
 - Component tests should verify rendering, accessibility, and RTL safety.
-- Browser tests should cover search flows, reading views, bookmark/note privacy defaults, and Arabic typography regressions.
+- Browser tests should cover search flows, explore filtering, reading views, bookmark/note privacy defaults, ayah navigation, and Arabic typography regressions.
 - Visual review should preserve elegant, Arabic-inspired presentation without reducing readability.
-- The current baseline includes Vitest coverage in `apps/web/src/test` for route architecture, reader attribution, semantic-search wording, API client URL handling, and the TanStack Query runtime foundation surface.
+- The current baseline includes Vitest coverage in `apps/web/src/test` for route architecture, bundled reader-data helpers, explore filtering, reader attribution, reader controls, semantic-search wording, API client URL handling, and the TanStack Query runtime foundation surface.
 
 ## Data Validation
 
