@@ -185,6 +185,31 @@ QuranKit should enforce the following validations during import and in test cove
 - every public-serving row carries source attribution
 - BOM handling, if any, is explicit and tested
 
+## Implemented Pipeline
+
+The current QuranKit data pipeline now operates against the locked `quran.sql.zip` snapshot directly.
+
+- `./scripts/run-data-validation.sh` downloads or reuses the locked upstream artifact, verifies the expected SHA-256, and validates:
+  - 114 surahs
+  - 6236 ayahs
+  - sequential global ayah ids and numbers
+  - sequential `number_in_surah` values inside each surah
+  - page, juz, hizb, and rub el hizb ranges
+  - full per-edition ayah coverage
+- `./scripts/load-quran-data.sh` applies Alembic migrations, seeds source provenance rows, and loads normalized QuranKit tables into the configured database.
+- `./scripts/build-data-artifacts.sh --output-dir <dir>` emits:
+  - a normalized SQLite database
+  - JSON exports plus a manifest
+  - a PostgreSQL seed SQL export
+
+Current implementation details:
+
+- exact-source Quran text is stored in canonical `ayahs.text`
+- the upstream BOM on the first ayah is preserved and marked in row metadata instead of being silently stripped
+- `hizb_id` is normalized into both `hizb_number` (`1..60`) and `rub_el_hizb_number` (`1..240`)
+- edition rows are imported with source attribution and kept non-public by default until attribution review is complete
+- source provenance records include both the downloaded `quran.sql.zip` artifact and the extracted `quran.sql` payload checksum
+
 ## Recommendation
 
 `AbdullahGhanem/quran-database` is acceptable as an initial QuranKit bootstrap source for raw Quran text, edition catalog metadata, and baseline translations. It is not sufficient on its own for final public-serving attribution or rights confidence.
@@ -246,7 +271,7 @@ Run the initial schema migration from the repository root:
 ./scripts/run-db-migrations.sh
 ```
 
-Seed the evaluated upstream source metadata:
+Seed the evaluated upstream source metadata only:
 
 ```bash
 ./scripts/seed-source-metadata.sh
@@ -254,4 +279,17 @@ Seed the evaluated upstream source metadata:
 
 If `QURANKIT_DATABASE_URL` is unset, both scripts default to `apps/api/.data/qurankit.db`.
 
-The current seed step inserts source provenance rows only. Full Quran text import, normalization, and validation against the complete 114-surah and 6236-ayah dataset remain the next data-layer step.
+Load the full normalized Quran dataset:
+
+```bash
+./scripts/load-quran-data.sh
+```
+
+Build normalized artifacts:
+
+```bash
+./scripts/build-data-artifacts.sh --output-dir .data/exports
+```
+
+The locked upstream archive is cached at `apps/api/.data/upstream/quran.sql.zip`.
+Generated build artifacts are ignored by git and can be regenerated on demand.

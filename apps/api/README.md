@@ -24,7 +24,7 @@ It also now includes:
 
 - SQLAlchemy models for Quran text, translation, attribution, personal reading state, and semantic embedding metadata
 - Alembic migrations under `apps/api/alembic`
-- a source metadata seed module for the evaluated upstream snapshot
+- a locked-source normalization, validation, load, and export pipeline for the evaluated upstream snapshot
 
 Run the backend tests from the repository root with:
 
@@ -32,11 +32,24 @@ Run the backend tests from the repository root with:
 ./scripts/run-backend-tests.sh
 ```
 
-Run the initial database bootstrap from the repository root with:
+Validate the locked upstream dump from the repository root with:
+
+```bash
+./scripts/run-data-validation.sh
+```
+
+Load normalized Quran data into the configured database from the repository root with:
 
 ```bash
 ./scripts/run-db-migrations.sh
-./scripts/seed-source-metadata.sh
+./scripts/load-quran-data.sh
 ```
 
-If `QURANKIT_DATABASE_URL` is not set, these scripts use `apps/api/.data/qurankit.db`.
+Build SQLite, JSON, and PostgreSQL seed artifacts with:
+
+```bash
+./scripts/build-data-artifacts.sh --output-dir .data/exports
+```
+
+If `QURANKIT_DATABASE_URL` is not set, the database scripts use `apps/api/.data/qurankit.db`.
+The locked upstream archive cache lives at `apps/api/.data/upstream/quran.sql.zip`.

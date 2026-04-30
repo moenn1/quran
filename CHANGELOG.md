@@ -9,3 +9,4 @@
 - Added the first SQLAlchemy model layer, Alembic migration scaffold, and source provenance seed flow for QuranKit's normalized database foundation.
 - Added private-by-default persistence tables for reading state plus semantic embedding metadata constraints for future search indexing.
 - Added backend run instructions, API/testing docs, and a repository-level backend pytest entrypoint.
+- Added a locked-source normalization pipeline with checksum validation, exact-text loading, human-readable validation output, and SQLite/JSON/PostgreSQL export generation.

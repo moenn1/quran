@@ -62,14 +62,23 @@ Run backend tests from the repository root:
 ./scripts/run-backend-tests.sh
 ```
 
-Initialize the local database schema and source metadata:
+Validate and load the locked upstream dataset:
 
 ```bash
+./scripts/run-data-validation.sh
 ./scripts/run-db-migrations.sh
-./scripts/seed-source-metadata.sh
+./scripts/load-quran-data.sh
 ```
 
-If `QURANKIT_DATABASE_URL` is unset, both scripts default to `apps/api/.data/qurankit.db`.
+Build normalized SQLite, JSON, and PostgreSQL seed artifacts:
+
+```bash
+./scripts/build-data-artifacts.sh --output-dir .data/exports
+```
+
+If `QURANKIT_DATABASE_URL` is unset, the database scripts default to `apps/api/.data/qurankit.db`.
+The locked upstream archive is cached at `apps/api/.data/upstream/quran.sql.zip`.
+Build artifacts default to `apps/api/.data/exports` unless `--output-dir` is provided.
 
 The current schema foundation includes:
 
@@ -77,5 +86,11 @@ The current schema foundation includes:
 - canonical `surahs`, `ayahs`, `translations`, and `ayah_translations` tables
 - private-by-default tables for reading sessions, progress, plans, bookmarks, and notes
 - semantic embedding metadata records that target either an ayah or a translation row
+
+The data pipeline now:
+
+- validates the locked upstream dump for 114 surahs, 6236 ayahs, sequential global ayah numbers, per-surah sequencing, metadata ranges, and full edition coverage
+- preserves exact sourced Quran text, including the upstream BOM artifact on the first ayah, while recording source checksums and dump metadata
+- loads normalized QuranKit tables and emits SQLite, JSON, and PostgreSQL seed artifacts from the same locked source snapshot
 
 Additional backend notes live in [docs/api.md](docs/api.md), [docs/database.md](docs/database.md), and [docs/testing.md](docs/testing.md).
