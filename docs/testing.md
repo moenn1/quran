@@ -21,6 +21,8 @@ QuranKit needs layered verification across repository quality, backend behavior,
 - Command tests should cover reading flows, exact search, semantic-search wording, bookmark management, note management, and export behavior.
 - Snapshot or golden tests are acceptable for stable text output as long as Quran text itself is not mutated by test fixtures.
 - The current CLI baseline lives in `apps/cli` and uses pytest coverage for config persistence, backend selection, and the initial `qurankit config` command surface.
+- `./scripts/run-cli-tests.sh` expects `python -m pip install -e 'apps/cli[dev]'` in the active Python environment and runs the CLI pytest suite against that environment.
+- `./scripts/smoke-cli.sh` verifies the installed `qurankit` entrypoint, temporary config storage, and isolated `config show/set` behavior outside the in-process pytest runner.
 
 ## Frontend
 
@@ -46,6 +48,7 @@ QuranKit needs layered verification across repository quality, backend behavior,
 - `./scripts/run-backend-tests.sh`
 - `./scripts/run-frontend-tests.sh`
 - `./scripts/run-cli-tests.sh`
+- `./scripts/smoke-cli.sh`
 - `./scripts/run-data-validation.sh`
 - `./scripts/run-e2e.sh`
 - `./scripts/smoke-compose.sh`

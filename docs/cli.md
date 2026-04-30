@@ -14,6 +14,8 @@ python -m pip install -e 'apps/cli[dev]'
 
 The editable install exposes the `qurankit` command and the pytest dependencies used by `./scripts/run-cli-tests.sh`.
 
+`./scripts/smoke-cli.sh` verifies the installed `qurankit` console script itself with a temporary config/data home so release checks cover the packaging path as well as the in-process pytest suite.
+
 ## Current Commands
 
 ### Configuration

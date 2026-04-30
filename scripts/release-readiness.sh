@@ -22,6 +22,7 @@ fi
 ./scripts/run-backend-tests.sh
 ./scripts/run-frontend-tests.sh
 ./scripts/run-cli-tests.sh
+./scripts/smoke-cli.sh
 ./scripts/run-data-validation.sh
 ./scripts/run-e2e.sh
 

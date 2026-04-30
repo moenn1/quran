@@ -16,6 +16,8 @@ python -m pip install -e 'apps/cli[dev]'
 
 The editable install exposes the `qurankit` command and the pytest dependencies used by `./scripts/run-cli-tests.sh`.
 
+`./scripts/smoke-cli.sh` verifies the installed `qurankit` console script itself with a temporary config/data home so release checks cover the packaging path as well as the pytest suite.
+
 ## Current Commands
 
 - `qurankit config show`
@@ -52,3 +54,5 @@ When translation output is enabled in local mode, the SQLite database must inclu
 ## Development Coverage
 
 `./scripts/run-cli-tests.sh` runs the CLI pytest suite against config handling, backend selection, local SQLite queries, remote API mode, and Typer command output.
+
+`./scripts/smoke-cli.sh` exercises `qurankit --version`, `qurankit config show --format json`, and isolated `config set` persistence through the installed console entrypoint.

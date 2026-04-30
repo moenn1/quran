@@ -1,4 +1,4 @@
-.PHONY: lint docs backend-test frontend-test cli-test data-validation e2e smoke-compose release-readiness
+.PHONY: lint docs backend-test frontend-test cli-test cli-smoke data-validation e2e smoke-compose release-readiness
 
 lint:
 	./scripts/lint-repo.sh
@@ -14,6 +14,9 @@ frontend-test:
 
 cli-test:
 	./scripts/run-cli-tests.sh
+
+cli-smoke:
+	./scripts/smoke-cli.sh
 
 data-validation:
 	./scripts/run-data-validation.sh

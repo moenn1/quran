@@ -40,6 +40,7 @@ for file in \
   docs/cli.md \
   docs/release-readiness.md \
   scripts/analyze_upstream_quran_sql.py \
+  scripts/smoke-cli.sh \
   tests/test_analyze_upstream_quran_sql.py \
   docker/api.Dockerfile \
   docker/web.Dockerfile \
@@ -65,7 +66,10 @@ assert_text docs/religious-safety.md "Semantic search is textual similarity, not
 assert_text docs/religious-safety.md "Bookmarks, notes, and reading progress must be private by default."
 assert_text docs/database.md "Attribution Requirements For QuranKit"
 assert_text docs/cli.md "python -m pip install -e 'apps/cli[dev]'"
+assert_text docs/cli.md "./scripts/smoke-cli.sh"
 assert_text docs/cli.md "Keep bookmarks, notes, and reading progress private by default"
 assert_text docs/cli.md "Describe semantic search as textual similarity only"
+assert_text docs/release-readiness.md "./scripts/smoke-cli.sh"
 assert_text docs/frontend-architecture.md "Semantic results must never be presented as tafsir, fatwa, or rulings."
 assert_text docs/testing.md "./scripts/run-e2e.sh"
+assert_text docs/testing.md "./scripts/smoke-cli.sh"

@@ -22,4 +22,5 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 ### Fixed
 
 - Made CLI test automation reproducible in clean environments by installing `apps/cli[dev]` in GitHub Actions, updating `./scripts/run-cli-tests.sh` to use one Python interpreter consistently, and documenting the required local setup.
+- Added `./scripts/smoke-cli.sh` and restored the CLI setup path in the release docs so QuranKit now verifies the installed `qurankit` console script and isolated config persistence as part of release-readiness.
 - Tightened repository documentation checks so CLI install instructions, CLI README scope, privacy wording, and semantic-search disclaimers stay aligned across the tracked docs.

@@ -5,6 +5,7 @@ QuranKit should not be tagged or promoted without passing the following checks.
 ## Required
 
 - `./scripts/release-readiness.sh`
+- `./scripts/smoke-cli.sh`
 - `./scripts/smoke-compose.sh`
 - Updated `CHANGELOG.md`
 - Updated repository docs for any changed guarantees, setup, or guardrails
