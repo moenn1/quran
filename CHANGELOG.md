@@ -8,7 +8,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 
 ### Added
 
-- Added `/explore`, `/surah/[number]`, and `/ayah/[surah]/[ayah]` to the web app with bundled routed surah samples, surah filtering, translation and text-view toggles, font controls, private study actions, attribution-safe copy behavior, and previous/next navigation.
+- Added dedicated API, CLI, database, semantic-search, reading-tracker, and contributor docs so the repository now documents its contract surfaces, privacy defaults, source-attribution rules, and self-hosting caveats more concretely.
 - Added Tailwind and TanStack Query foundations to `apps/web`, including a shared app provider, API client utilities, PostCSS wiring, and a runtime foundation panel on the home route.
 - Expanded the QuranKit CLI with local-first private study state, `progress`, `bookmark`, `note`, `plan`, and `export` commands, ayah-range parsing, authenticated optional remote study-state mode, attribution-safe surah export, and pytest coverage for private workflow behavior.
 - Added the first `apps/cli` Typer package scaffold with persisted configuration, remote API and local SQLite backend selection, and initial `qurankit config show/set` commands.
@@ -24,6 +24,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 
 ### Fixed
 
+- Clarified that the current Docker bootstrap API is only a health-and-safety surface, while the documented `/api/v1/...` routes remain a production contract for future API work and CLI remote mode.
 - Made CLI test automation reproducible in clean environments by installing `apps/cli[dev]` in GitHub Actions, updating `./scripts/run-cli-tests.sh` to use one Python interpreter consistently, and documenting the required local setup.
 - Added `./scripts/smoke-cli.sh` and restored the CLI setup path in the release docs so QuranKit now verifies the installed `qurankit` console script and isolated config persistence as part of release-readiness.
 - Unified `./scripts/run-cli-tests.sh` and `./scripts/smoke-cli.sh` on one shared Python-selection helper so CLI pytest and installed-entrypoint smoke checks stay aligned in clean environments.

@@ -58,6 +58,9 @@ Some scripts intentionally no-op until their corresponding application surfaces 
 - Update `docs/testing.md` when new test suites or verification rules are introduced.
 - Update `docs/religious-safety.md` whenever religious-safety, privacy, source-attribution, or UI-readability rules change.
 - Update `docs/api.md` and `docs/cli.md` when interfaces or guarantees change.
+- Update `docs/semantic-search.md` when similarity-search behavior, disclaimers, ranking inputs, or vector-search infrastructure assumptions change.
+- Update `docs/reading-tracker.md` when progress, bookmarks, notes, plans, exports, privacy defaults, or remote study-state contracts change.
+- Update `docs/contributing.md` when repository workflow expectations or documentation ownership rules change.
 
 ## Reporting Religious or Privacy Concerns
 

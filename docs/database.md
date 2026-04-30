@@ -185,6 +185,46 @@ QuranKit should enforce the following validations during import and in test cove
 - every public-serving row carries source attribution
 - BOM handling, if any, is explicit and tested
 
+## Illustrative Normalized Serving Record
+
+The example below shows the shape QuranKit should be able to serve after import and normalization. It is illustrative and intentionally uses placeholders instead of literal Quran text.
+
+```json
+{
+  "ayah": {
+    "reference": "1:1",
+    "surah_number": 1,
+    "ayah_number": 1,
+    "surah_name_arabic": "<source-preserved surah name>",
+    "surah_name_english": "Al-Fatihah",
+    "arabic_text": "<source-preserved ayah text>",
+    "translation_text": "<reviewed translation text>",
+    "page_number": 1,
+    "juz_number": 1,
+    "hizb_number": 1,
+    "sajda": false
+  },
+  "arabic_source": {
+    "repository": "AbdullahGhanem/quran-database",
+    "snapshot": "f6c4c805f22b0432677d79aafc12139b915e1a0d"
+  },
+  "translation_attribution": {
+    "identifier": "en.sahih",
+    "english_name": "Saheeh International",
+    "edition_type": "translation",
+    "format": "text"
+  }
+}
+```
+
+## Self-Hosting and Serving Implications
+
+- `compose.yaml` provisions PostgreSQL and optional Qdrant infrastructure, but it does not ship imported Quran rows yet.
+- Do not expose production read endpoints until import validation, attribution review, and edition-rights review have passed.
+- Run `./scripts/run-data-validation.sh` whenever upstream snapshots, normalization rules, or attribution metadata change.
+- Build semantic-search indexes only from reviewed editions and keep the similarity disclaimer attached end-to-end. See [docs/semantic-search.md](semantic-search.md).
+- Keep [docs/api.md](api.md) and [docs/self-hosting.md](self-hosting.md) aligned whenever schema or serving assumptions change.
+
 ## Recommendation
 
 `AbdullahGhanem/quran-database` is acceptable as an initial QuranKit bootstrap source for raw Quran text, edition catalog metadata, and baseline translations. It is not sufficient on its own for final public-serving attribution or rights confidence.
