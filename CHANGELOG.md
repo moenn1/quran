@@ -8,6 +8,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 
 ### Added
 
+- Added `docs/release-safety-checklist.md` as a dedicated privacy and religious-safety release gate covering Quran text preservation, attribution, semantic-search wording, private-by-default study data, export/delete affordances, README note preservation, and non-commercial framing.
 - Added dedicated API, CLI, database, semantic-search, reading-tracker, and contributor docs so the repository now documents its contract surfaces, privacy defaults, source-attribution rules, and self-hosting caveats more concretely.
 - Added interactive `/search` and `/semantic` web routes with bundled exact-match filtering, result context, similarity-preview controls, optional scores, and private bookmark/plan/copy actions.
 - Added Tailwind and TanStack Query foundations to `apps/web`, including a shared app provider, API client utilities, PostCSS wiring, and a runtime foundation panel on the home route.

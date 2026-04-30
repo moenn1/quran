@@ -57,6 +57,7 @@ Some scripts intentionally no-op until their corresponding application surfaces 
 - Update `docs/self-hosting.md` when Compose services, container assumptions, or environment variables change.
 - Update `docs/testing.md` when new test suites or verification rules are introduced.
 - Update `docs/religious-safety.md` whenever religious-safety, privacy, source-attribution, or UI-readability rules change.
+- Update `docs/release-safety-checklist.md` whenever privacy or religious-safety release criteria change.
 - Update `docs/api.md` and `docs/cli.md` when interfaces or guarantees change.
 - Update `docs/semantic-search.md` when similarity-search behavior, disclaimers, ranking inputs, or vector-search infrastructure assumptions change.
 - Update `docs/reading-tracker.md` when progress, bookmarks, notes, plans, exports, privacy defaults, or remote study-state contracts change.

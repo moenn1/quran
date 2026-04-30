@@ -8,6 +8,7 @@ QuranKit needs layered verification across repository quality, backend behavior,
 - `./scripts/check-docs.sh` enforces required files and repository guarantees such as the maintainer note, semantic-search disclaimer, privacy defaults, and release docs.
 - `./scripts/check-docs.sh` also requires the dedicated API, CLI, database, semantic-search, reading-tracker, and contributor docs so release notes and implementation docs do not drift apart.
 - `./scripts/check-docs.sh` also pins the CLI install path and CLI-facing safety wording so release docs do not drift from the tested setup.
+- `./scripts/check-docs.sh` also pins the privacy and religious-safety release checklist so export/delete review points and non-commercial framing checks do not drift.
 - `docker compose -f compose.yaml config` validates the self-hosting configuration.
 - `./scripts/smoke-compose.sh` boots the bootstrap stack under an isolated Compose project, checks the API and web endpoints, and shuts the stack down.
 

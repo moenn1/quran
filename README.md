@@ -39,7 +39,7 @@ This repository is being bootstrapped.
 - `apps/cli` contains the Typer CLI with persisted config, local-first private study state, and `surah`, `ayah`, `juz`, `random`, `search`, `semantic`, `progress`, `bookmark`, `note`, `plan`, and `export` commands.
 - `apps/web` contains the Next.js web app scaffold with the Arabic-inspired design system, Tailwind utility layer, and TanStack Query/API client foundation for live data.
 - `docs/frontend-architecture.md` documents the Arabic-inspired UI direction, route structure, and frontend component boundaries.
-- `docs/api.md`, `docs/cli.md`, `docs/semantic-search.md`, and `docs/reading-tracker.md` document the planned API contract, CLI workflows, semantic-search guardrails, and private study-state behavior that future services must preserve.
+- `docs/api.md`, `docs/cli.md`, `docs/semantic-search.md`, `docs/reading-tracker.md`, and `docs/release-safety-checklist.md` document the planned API contract, CLI workflows, semantic-search guardrails, private study-state behavior, and release-blocking safety checks that future services must preserve.
 - `docs/database.md` and `docs/contributing.md` document upstream data provenance, attribution constraints, and contributor workflow expectations.
 - `CHANGELOG.md` tracks repository changes across the repository foundation, CLI scaffold, and frontend architecture.
 
@@ -114,5 +114,6 @@ The repository now includes a release-quality bootstrap for self-hosting, docume
 - [docs/cli.md](docs/cli.md)
 - [docs/semantic-search.md](docs/semantic-search.md)
 - [docs/reading-tracker.md](docs/reading-tracker.md)
+- [docs/release-safety-checklist.md](docs/release-safety-checklist.md)
 - [docs/contributing.md](docs/contributing.md)
 - [docs/release-readiness.md](docs/release-readiness.md)

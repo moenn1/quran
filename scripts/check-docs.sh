@@ -40,6 +40,7 @@ for file in \
   docs/cli.md \
   docs/semantic-search.md \
   docs/reading-tracker.md \
+  docs/release-safety-checklist.md \
   docs/contributing.md \
   docs/release-readiness.md \
   scripts/analyze_upstream_quran_sql.py \
@@ -81,9 +82,14 @@ assert_text docs/semantic-search.md "textual similarity only"
 assert_text docs/semantic-search.md "docker compose --profile semantic-search up --build"
 assert_text docs/reading-tracker.md "/api/v1/me/study"
 assert_text docs/reading-tracker.md "Private by default does not mean encrypted"
+assert_text docs/release-safety-checklist.md "Quran text shown in API, CLI, web, and exports still matches the validated source exactly."
+assert_text docs/release-safety-checklist.md "Related passages by textual similarity only"
+assert_text docs/release-safety-checklist.md "Where a private-study surface supports deletion or removal"
+assert_text docs/release-safety-checklist.md "no commercial gain"
 assert_text docs/contributing.md "./scripts/check-docs.sh"
 assert_text docs/contributing.md "./scripts/release-readiness.sh"
 assert_text docs/release-readiness.md "./scripts/smoke-cli.sh"
+assert_text docs/release-readiness.md "docs/release-safety-checklist.md"
 assert_text docs/frontend-architecture.md "Semantic results must never be presented as tafsir, fatwa, or rulings."
 assert_text docs/testing.md "./scripts/run-e2e.sh"
 assert_text docs/testing.md ".venv/bin/python"
