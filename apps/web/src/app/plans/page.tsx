@@ -1,6 +1,6 @@
 import { PageHero } from "@/components/page-hero";
-import { SectionDeck } from "@/components/section-deck";
-import { heroPills, planCards } from "@/lib/site-data";
+import { PlansExperience } from "@/components/plans-experience";
+import { heroPills } from "@/lib/site-data";
 
 export default function PlansPage() {
   return (
@@ -8,15 +8,10 @@ export default function PlansPage() {
       <PageHero
         eyebrow="Plans"
         title="Reading plans that feel steady, editable, and personal"
-        description="Plan architecture in QuranKit should support different reading cadences without turning the interface into a rigid scheduler."
+        description="Reading plans in QuranKit are built to stay steady, editable, and personal. The current web slice keeps them local-first and scoped to the bundled sample until the broader reader corpus is connected."
         pills={heroPills.plans}
       />
-      <SectionDeck
-        label="Plan structure"
-        title="Cadence, checkpoints, and privacy need to stay visible"
-        description="The plan foundation keeps today's reading simple while leaving room for richer workflows later."
-        cards={planCards}
-      />
+      <PlansExperience />
     </>
   );
 }

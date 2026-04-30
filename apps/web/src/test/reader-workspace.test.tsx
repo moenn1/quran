@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
 
 import { ReaderWorkspace } from "@/components/reader-workspace";
+import { StudyStateProvider } from "@/components/study-state-provider";
 import { bundledReaderAttribution, getBundledSurah } from "@/lib/reader-data";
 
 describe("ReaderWorkspace", () => {
@@ -18,12 +19,16 @@ describe("ReaderWorkspace", () => {
       throw new Error("Expected bundled surah sample.");
     }
 
+    window.localStorage.clear();
+
     const { container } = render(
-      <ReaderWorkspace
-        surah={surah}
-        ayahs={surah.ayahs}
-        navigationLabel="Surah reader"
-      />,
+      <StudyStateProvider>
+        <ReaderWorkspace
+          surah={surah}
+          ayahs={surah.ayahs}
+          navigationLabel="Surah reader"
+        />
+      </StudyStateProvider>,
     );
 
     expect(screen.getByText("Allah, the Eternal Refuge.")).toBeInTheDocument();

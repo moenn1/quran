@@ -38,7 +38,7 @@ This repository is being bootstrapped.
 
 - `apps/api` contains the FastAPI backend, Alembic migrations, normalized data pipeline, browse routes, and exact-search endpoint.
 - `apps/cli` contains the Typer CLI with persisted config, local-first private study state, and `surah`, `ayah`, `juz`, `random`, `search`, `semantic`, `progress`, `bookmark`, `note`, `plan`, and `export` commands.
-- `apps/web` contains the Next.js web app scaffold with the Arabic-inspired design system, Tailwind utility layer, and TanStack Query/API client foundation for live data.
+- `apps/web` contains the Next.js web app with the Arabic-inspired design system, bundled reader and search routes, local-first private study-state pages (`/progress`, `/plans`, `/bookmarks`, `/notes`, `/settings`), and the TanStack Query/API client foundation for live data.
 - `docs/frontend-architecture.md` documents the Arabic-inspired UI direction, route structure, and frontend component boundaries.
 - `docs/api.md`, `docs/cli.md`, `docs/semantic-search.md`, `docs/reading-tracker.md`, `docs/testing.md`, and `docs/release-safety-checklist.md` document the API contract, implemented backend behavior, CLI workflows, semantic-search guardrails, private study-state behavior, release-blocking safety checks, and test expectations that future services must preserve.
 - `docs/database.md` and `docs/contributing.md` document upstream data provenance, attribution constraints, normalization details, and contributor workflow expectations.

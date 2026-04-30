@@ -1,6 +1,8 @@
+import { Suspense } from "react";
+
 import { PageHero } from "@/components/page-hero";
-import { SectionDeck } from "@/components/section-deck";
-import { heroPills, noteCards } from "@/lib/site-data";
+import { NotesExperience } from "@/components/notes-experience";
+import { heroPills } from "@/lib/site-data";
 
 export default function NotesPage() {
   return (
@@ -8,15 +10,21 @@ export default function NotesPage() {
       <PageHero
         eyebrow="Notes"
         title="Private study notes linked to verses, not social features"
-        description="The notes architecture treats reflections as personal study material, with clear references and explicit export boundaries."
+        description="The notes surface treats reflections as personal study material, with clear references, plain language, and explicit export boundaries. It stays separate from tafsir, fatwa, or any social commentary layer."
         pills={heroPills.notes}
       />
-      <SectionDeck
-        label="Notes workflow"
-        title="Keep the note surface plain, private, and reference-aware"
-        description="Notes should feel like a personal study margin attached to the reader rather than a chat stream or feed."
-        cards={noteCards}
-      />
+      <Suspense
+        fallback={
+          <section className="reader-panel reader-panel--support">
+            <p className="section-label">Private notes</p>
+            <p className="reader-status">
+              Loading the local note composer and linked reference state.
+            </p>
+          </section>
+        }
+      >
+        <NotesExperience />
+      </Suspense>
     </>
   );
 }

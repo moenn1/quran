@@ -14,6 +14,28 @@ The current CLI already supports:
 
 Those features should remain one coherent private study-state surface whether the data lives in a local JSON file or a future authenticated API.
 
+## Current Web UI
+
+The web app now exposes private study-state routes for:
+
+- `/progress`
+- `/plans`
+- `/bookmarks`
+- `/notes`
+- `/settings`
+
+The current web slice uses the bundled reader sample that already powers `/explore`, `/surah/[number]`, and `/ayah/[surah]/[ayah]`.
+
+The web routes currently support:
+
+- manual progress checkpoints
+- overall bundled-sample progress by surah and juz
+- active-plan targets and plan recalculation
+- bookmark search and label filtering
+- private note creation and editing
+- reader-default controls for translation visibility, text view, type scale, and reduced motion
+- deliberate JSON export previews and local-data clearing
+
 ## Privacy Rules
 
 - Reading progress, bookmarks, notes, and plans are private by default.
@@ -51,6 +73,22 @@ Relevant overrides:
 - `QURANKIT_DATA_HOME`
 
 This is the default and the only fully working storage path in the repository today.
+
+### Web Browser Local State
+
+The web app stores private study state in browser local storage under:
+
+- `qurankit.study-state.v1`
+
+That browser-local snapshot currently includes:
+
+- the core study document (`progress`, `bookmarks`, `notes`, `plans`)
+- completed-reference history used for progress dashboards
+- the active plan id
+- reader preferences such as translation visibility and type scale
+- a small local activity timeline for private progress summaries
+
+This browser-local model is still private by default. It is not synced to a server in the current web slice.
 
 ### Authenticated Remote State Contract
 
@@ -125,16 +163,20 @@ Illustrative payload:
 
 For the remote contract, treat `PUT /api/v1/me/study` as a full document replacement unless and until the API explicitly documents patch semantics.
 
+The current web app keeps its richer local progress metadata in browser storage so it can power streaks, bundled-sample completion summaries, and reader defaults without implying that the authenticated API already supports those fields.
+
 ## Self-Hosting Notes
 
 - Keep the study-state store private by default in all container and deployment examples.
 - Do not expose study-state routes without authentication.
 - Review `.env.example`, `.env.api.example`, and `.env.web.example` when changing privacy wording.
 - Keep [docs/self-hosting.md](self-hosting.md), [docs/api.md](api.md), and [docs/cli.md](cli.md) aligned whenever study-state behavior changes.
+- Keep [docs/frontend-architecture.md](frontend-architecture.md) aligned when web study-state flows or browser-local persistence change.
 
 ## Limitations Before Release
 
 - The repository's working implementation is local-first, single-user JSON storage.
+- The web app currently stores its private study state in browser local storage and previews exports locally; it does not implement authenticated sync.
 - Local notes, plans, bookmarks, and progress are private by default, but they are not encrypted by the CLI.
 - Remote sync is contract-only until the production API is implemented.
 - Exported private data should be handled carefully because JSON exports can be copied outside the user's private storage path.
