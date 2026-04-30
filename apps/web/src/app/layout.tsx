@@ -21,7 +21,7 @@ type RootLayoutProps = {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
       <body className="min-h-screen bg-transparent text-[color:var(--ink)]">
         <AppProviders>
           <AppShell>{children}</AppShell>

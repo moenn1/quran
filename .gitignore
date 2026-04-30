@@ -19,3 +19,5 @@ apps/api/.venv/
 apps/web/.next/
 apps/web/node_modules/
 apps/web/coverage/
+apps/web/playwright-report/
+apps/web/test-results/

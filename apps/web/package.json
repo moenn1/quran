@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint .",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test --update-snapshots"
   },
   "dependencies": {
     "@fontsource/newsreader": "^5.2.10",
@@ -20,7 +22,9 @@
     "react-dom": "^19.2.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.0",
     "@eslint/eslintrc": "^3.3.5",
+    "@playwright/test": "^1.56.1",
     "@tailwindcss/postcss": "^4.2.4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

@@ -107,6 +107,10 @@ jobs:
       - name: Run data validation entry point
         run: ./scripts/run-data-validation.sh
 
+      - name: Install Playwright browser
+        if: ${{ hashFiles('apps/web/package.json') != '' }}
+        run: npx playwright install --with-deps chromium
+
       - name: Run end-to-end entry point
         run: ./scripts/run-e2e.sh
 
