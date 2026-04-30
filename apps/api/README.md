@@ -26,6 +26,7 @@ The API now exposes:
 - `GET /api/v1/hizb/{number}`
 - `GET /api/v1/pages/{number}`
 - `GET /api/v1/search/exact`
+- `GET /api/v1/search/semantic`
 - `GET /docs`
 - `GET /openapi.json`
 
@@ -36,6 +37,7 @@ It also now includes:
 - a locked-source normalization, validation, load, and export pipeline for the evaluated upstream snapshot
 - database-backed browse handlers that read normalized surah and ayah data from the configured QuranKit database
 - an exact-search API with field filters, edition filters, pagination, and attribution-aware highlights
+- a semantic-search API with similarity-only disclaimer wording, scoped filters, optional scores, context references, and source-preserving attribution
 
 Run the backend tests from the repository root with:
 

@@ -14,6 +14,14 @@ class SearchField(StrEnum):
     translation = "translation"
 
 
+class SemanticSearchScope(StrEnum):
+    all = "all"
+    surah = "surah"
+    juz = "juz"
+    hizb = "hizb"
+    page = "page"
+
+
 class EditionAttribution(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -70,3 +78,49 @@ class ExactSearchResponse(BaseModel):
     arabic_source: SourceAttribution | None = None
     translation_attribution: EditionAttribution | None = None
     edition_attributions: list[EditionAttribution] = Field(default_factory=list)
+
+
+class SemanticSearchFilters(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    search_scope: SemanticSearchScope = SemanticSearchScope.all
+    translation_identifier: str | None = None
+    surah_number: int | None = None
+    juz_number: int | None = None
+    hizb_number: int | None = None
+    page_number: int | None = None
+    threshold: float
+    include_scores: bool
+
+
+class SemanticContextReferences(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    previous_reference: str | None = None
+    next_reference: str | None = None
+
+
+class SemanticAyahResource(AyahResource):
+    translation_text: str | None = None
+
+
+class SemanticSearchHitResource(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    ayah: SemanticAyahResource
+    reason: str
+    context: SemanticContextReferences
+    similarity_score: float | None = None
+
+
+class SemanticSearchResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    query: str
+    match_type: Literal["semantic_similarity"] = "semantic_similarity"
+    count: int
+    disclaimer: str
+    filters: SemanticSearchFilters
+    results: list[SemanticSearchHitResource]
+    arabic_source: SourceAttribution | None = None
+    translation_attribution: EditionAttribution | None = None

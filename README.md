@@ -36,7 +36,7 @@ This repository is being bootstrapped.
 
 ## Current Foundation
 
-- `apps/api` contains the FastAPI backend, Alembic migrations, normalized data pipeline, browse routes, and exact-search endpoint.
+- `apps/api` contains the FastAPI backend, Alembic migrations, normalized data pipeline, browse routes, exact-search endpoint, and semantic-search endpoint.
 - `apps/cli` contains the Typer CLI with persisted config, local-first private study state, and `surah`, `ayah`, `juz`, `random`, `search`, `semantic`, `progress`, `bookmark`, `note`, `plan`, and `export` commands.
 - `apps/web` contains the Next.js web app with the Arabic-inspired design system, bundled reader and search routes, local-first private study-state pages (`/progress`, `/plans`, `/bookmarks`, `/notes`, `/settings`), and the TanStack Query/API client foundation for live data.
 - `docs/frontend-architecture.md` documents the Arabic-inspired UI direction, route structure, and frontend component boundaries.
@@ -105,6 +105,7 @@ Key endpoints:
 - `GET /api/v1/hizb/{number}`
 - `GET /api/v1/pages/{number}`
 - `GET /api/v1/search/exact`
+- `GET /api/v1/search/semantic`
 - `GET /docs`
 - `GET /openapi.json`
 
@@ -128,10 +129,10 @@ Build artifacts default to `apps/api/.data/exports` unless `--output-dir` is pro
 
 ## Repository Layout
 
-- `apps/api`: FastAPI backend package, normalized data pipeline, Alembic migrations, browse and exact-search routes, and backend tests.
+- `apps/api`: FastAPI backend package, normalized data pipeline, Alembic migrations, browse and search routes, and backend tests.
 - `apps/cli`: Typer CLI package, config storage, private study state, lookup/search commands, export flows, backend selection, and CLI tests.
 - `apps/web`: Next.js web app shell, Arabic-inspired styling, Tailwind/Query foundation, route pages, and frontend tests.
-- `docs/api.md`: Bootstrap-vs-backend API notes, exact-search contract details, and planned semantic/private API surfaces.
+- `docs/api.md`: Bootstrap-vs-backend API notes, exact-search and semantic-search contract details, and planned private API surfaces.
 - `docs/database.md`: Source evaluation, attribution plan, and normalization guidance for the upstream Quran data.
 - `docs/frontend-architecture.md`: Frontend direction, route map, and implementation boundaries.
 

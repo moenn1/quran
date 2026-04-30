@@ -22,6 +22,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - Added a locked-source normalization pipeline with checksum validation, exact-text loading, human-readable validation output, and SQLite, JSON, and PostgreSQL export generation.
 - Added database-backed Quran browse endpoints for surahs, ayahs, juz, hizb, pages, and random ayah lookup with source attribution and backend pytest coverage.
 - Added an exact-search API with Arabic, simple-text, and translation filters, normalized search columns and indexes, result pagination, attribution-aware highlights, and exact-search pytest coverage.
+- Added a semantic-search API at `GET /api/v1/search/semantic` with the canonical similarity-only disclaimer, scoped filters, optional scores, context references, translation attribution, and backend pytest coverage.
 - Added repository backend scripts and docs for migrations, source metadata seeding, data loading, backend pytest, and data-validation flows.
 - Bootstrapped the `apps/web` Next.js frontend foundation with Arabic-inspired theme tokens, shared layout components, and route scaffolding for browse, reader, search, semantic search, progress, plans, bookmarks, notes, and settings.
 - Added an attributed Quran reader preview using a small sample from AlQuran.Cloud and a shared semantic-search disclaimer that keeps similarity search clearly separated from tafsir, fatwa, and religious rulings.
@@ -39,3 +40,4 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 - Added `./scripts/smoke-cli.sh` and restored the CLI setup path in the release docs so QuranKit now verifies the installed `qurankit` console script and isolated config persistence as part of release-readiness.
 - Unified `./scripts/run-cli-tests.sh` and `./scripts/smoke-cli.sh` on one shared Python-selection helper so CLI pytest and installed-entrypoint smoke checks stay aligned in clean environments.
 - Tightened repository documentation checks so CLI install instructions, CLI README scope, privacy wording, and semantic-search disclaimers stay aligned across the tracked docs.
+- Unified the API settings default, `.env.api.example`, Compose environment, and docs on the same semantic-search disclaimer text used by the live backend route.

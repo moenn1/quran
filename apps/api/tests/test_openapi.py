@@ -26,5 +26,10 @@ def test_openapi_document_exposes_health_contract(
     assert "/api/v1/surahs" in document["paths"]
     assert "/api/v1/ayahs/{reference}" in document["paths"]
     assert "/api/v1/search/exact" in document["paths"]
+    assert "/api/v1/search/semantic" in document["paths"]
+    assert (
+        document["paths"]["/api/v1/search/semantic"]["get"]["summary"]
+        == "Find related passages by textual similarity"
+    )
     assert "500" in health_path["responses"]
     assert "ErrorEnvelope" in document["components"]["schemas"]
