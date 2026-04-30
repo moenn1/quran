@@ -10,6 +10,8 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 
 - Added dedicated API, CLI, database, semantic-search, reading-tracker, and contributor docs so the repository now documents its contract surfaces, privacy defaults, source-attribution rules, and self-hosting caveats more concretely.
 - Added interactive `/search` and `/semantic` web routes with bundled exact-match filtering, result context, similarity-preview controls, optional scores, and private bookmark/plan/copy actions.
+- Added `/explore`, `/surah/[number]`, and `/ayah/[surah]/[ayah]` to the web app with bundled routed surah samples, surah filtering, translation and text-view toggles, font controls, private study actions, attribution-safe copy behavior, and previous/next navigation.
+- Added interactive `/progress`, `/plans`, `/bookmarks`, `/notes`, and `/settings` study-state routes with local browser persistence, shared reader preferences, bundled-sample progress summaries, plan creation/recalculation, bookmark filtering, private note editing, JSON export previews, and deliberate local-data clearing.
 - Added Tailwind and TanStack Query foundations to `apps/web`, including a shared app provider, API client utilities, PostCSS wiring, and a runtime foundation panel on the home route.
 - Expanded the QuranKit CLI with local-first private study state, `progress`, `bookmark`, `note`, `plan`, and `export` commands, ayah-range parsing, authenticated optional remote study-state mode, attribution-safe surah export, and pytest coverage for private workflow behavior.
 - Added the first `apps/cli` Typer package scaffold with persisted configuration, remote API and local SQLite backend selection, and initial `qurankit config show/set` commands.

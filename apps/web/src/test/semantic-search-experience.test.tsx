@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { vi } from "vitest";
 
 import { SemanticSearchExperience } from "@/components/semantic-search-experience";
+import { StudyStateProvider } from "@/components/study-state-provider";
 import { getBundledSurahs } from "@/lib/reader-data";
 
 describe("SemanticSearchExperience", () => {
@@ -13,7 +14,13 @@ describe("SemanticSearchExperience", () => {
       value: { writeText },
     });
 
-    render(<SemanticSearchExperience surahs={getBundledSurahs()} />);
+    window.localStorage.clear();
+
+    render(
+      <StudyStateProvider>
+        <SemanticSearchExperience surahs={getBundledSurahs()} />
+      </StudyStateProvider>,
+    );
 
     fireEvent.click(
       screen.getByRole("checkbox", {

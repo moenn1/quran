@@ -5,6 +5,7 @@ import type { CSSProperties } from "react";
 
 import Link from "next/link";
 
+import { useStudyState } from "@/components/study-state-provider";
 import { cn } from "@/lib/cn";
 import {
   bundledReaderAttribution,
@@ -13,6 +14,7 @@ import {
   type BundledAyah,
   type BundledSurah,
 } from "@/lib/reader-data";
+import { hasBookmarkForReference } from "@/lib/study-data";
 
 type TextView = "balanced" | "arabic" | "translation";
 type ArabicScale = "standard" | "large" | "majlis";
@@ -26,6 +28,7 @@ type ReaderWorkspaceProps = {
 };
 
 type AyahActionBarProps = {
+  surahNumber: number;
   ayah: BundledAyah;
   translationVisible: boolean;
 };
@@ -48,11 +51,17 @@ export function ReaderWorkspace({
   focusReference,
   navigationLabel,
 }: ReaderWorkspaceProps) {
-  const [translationVisible, setTranslationVisible] = useState(true);
-  const [textView, setTextView] = useState<TextView>("balanced");
-  const [arabicScale, setArabicScale] = useState<ArabicScale>("standard");
-  const [translationScale, setTranslationScale] =
-    useState<TranslationScale>("standard");
+  const { setReaderPreferences, snapshot } = useStudyState();
+  const [translationVisible, setTranslationVisible] = useState(
+    snapshot.preferences.translationVisible,
+  );
+  const [textView, setTextView] = useState<TextView>(snapshot.preferences.textView);
+  const [arabicScale, setArabicScale] = useState<ArabicScale>(
+    snapshot.preferences.arabicScale,
+  );
+  const [translationScale, setTranslationScale] = useState<TranslationScale>(
+    snapshot.preferences.translationScale,
+  );
 
   const style = {
     "--reader-arabic-size": arabicScaleVars[arabicScale],
@@ -129,6 +138,7 @@ export function ReaderWorkspace({
                     </p>
                   ) : null}
                   <AyahActionBar
+                    surahNumber={surah.number}
                     ayah={ayah}
                     translationVisible={translationVisible}
                   />
@@ -148,7 +158,11 @@ export function ReaderWorkspace({
               translationVisible && "reader-toggle--selected",
             )}
             aria-pressed={translationVisible}
-            onClick={() => setTranslationVisible((value) => !value)}
+            onClick={() => {
+              const nextValue = !translationVisible;
+              setTranslationVisible(nextValue);
+              setReaderPreferences({ translationVisible: nextValue });
+            }}
           >
             {translationVisible ? "Hide translation" : "Show translation"}
           </button>
@@ -172,7 +186,11 @@ export function ReaderWorkspace({
                     selected && "segmented-control__button--selected",
                   )}
                   aria-pressed={selected}
-                  onClick={() => setTextView(value as TextView)}
+                  onClick={() => {
+                    const nextValue = value as TextView;
+                    setTextView(nextValue);
+                    setReaderPreferences({ textView: nextValue });
+                  }}
                 >
                   {label}
                 </button>
@@ -199,7 +217,11 @@ export function ReaderWorkspace({
                     selected && "segmented-control__button--selected",
                   )}
                   aria-pressed={selected}
-                  onClick={() => setArabicScale(value as ArabicScale)}
+                  onClick={() => {
+                    const nextValue = value as ArabicScale;
+                    setArabicScale(nextValue);
+                    setReaderPreferences({ arabicScale: nextValue });
+                  }}
                 >
                   {label}
                 </button>
@@ -231,7 +253,11 @@ export function ReaderWorkspace({
                   )}
                   aria-pressed={selected}
                   disabled={!translationVisible}
-                  onClick={() => setTranslationScale(value as TranslationScale)}
+                  onClick={() => {
+                    const nextValue = value as TranslationScale;
+                    setTranslationScale(nextValue);
+                    setReaderPreferences({ translationScale: nextValue });
+                  }}
                 >
                   {label}
                 </button>
@@ -264,10 +290,19 @@ export function ReaderWorkspace({
   );
 }
 
-function AyahActionBar({ ayah, translationVisible }: AyahActionBarProps) {
-  const [bookmarked, setBookmarked] = useState(false);
-  const [read, setRead] = useState(false);
+function AyahActionBar({
+  surahNumber,
+  ayah,
+  translationVisible,
+}: AyahActionBarProps) {
+  const { clearProgress, markProgress, snapshot, toggleBookmark } = useStudyState();
   const [status, setStatus] = useState("");
+  const bookmarked = hasBookmarkForReference(snapshot, ayah.reference);
+  const read =
+    snapshot.state.progress?.range.start.surahNumber === surahNumber &&
+    snapshot.state.progress.range.start.ayahNumber === ayah.ayahNumber &&
+    snapshot.state.progress.range.end.surahNumber === surahNumber &&
+    snapshot.state.progress.range.end.ayahNumber === ayah.ayahNumber;
 
   async function copyAyah() {
     const text = [
@@ -301,12 +336,8 @@ function AyahActionBar({ ayah, translationVisible }: AyahActionBarProps) {
           className={cn("action-button", bookmarked && "action-button--selected")}
           aria-pressed={bookmarked}
           onClick={() => {
-            setBookmarked((value) => !value);
-            setStatus(
-              !bookmarked
-                ? `${ayah.reference} saved to private bookmarks in this preview.`
-                : `${ayah.reference} removed from private bookmarks in this preview.`,
-            );
+            const result = toggleBookmark({ reference: ayah.reference });
+            setStatus(result.message);
           }}
         >
           {bookmarked ? "Bookmarked" : "Bookmark"}
@@ -322,15 +353,16 @@ function AyahActionBar({ ayah, translationVisible }: AyahActionBarProps) {
           className={cn("action-button", read && "action-button--selected")}
           aria-pressed={read}
           onClick={() => {
-            setRead((value) => !value);
-            setStatus(
-              !read
-                ? `${ayah.reference} marked as read in this preview.`
-                : `${ayah.reference} removed from the local read marker in this preview.`,
-            );
+            const result = read
+              ? clearProgress()
+              : markProgress({
+                  startReference: ayah.reference,
+                  source: "reader_action",
+                });
+            setStatus(result.message);
           }}
         >
-          {read ? "Read marked" : "Mark read"}
+          {read ? "Checkpoint saved" : "Mark read"}
         </button>
         <button type="button" className="action-button" onClick={() => void copyAyah()}>
           Copy ayah

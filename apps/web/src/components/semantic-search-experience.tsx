@@ -4,8 +4,10 @@ import { useDeferredValue, useState } from "react";
 
 import Link from "next/link";
 
+import { useStudyState } from "@/components/study-state-provider";
 import { cn } from "@/lib/cn";
 import { bundledReaderAttribution, type BundledSurah } from "@/lib/reader-data";
+import { hasBookmarkForReference } from "@/lib/study-data";
 import {
   getBundledJuzOptions,
   getBundledSurahOptions,
@@ -259,7 +261,8 @@ function SemanticResultCard({
   showScores,
   translationMode,
 }: SemanticResultCardProps) {
-  const [bookmarked, setBookmarked] = useState(false);
+  const { snapshot, toggleBookmark } = useStudyState();
+  const bookmarked = hasBookmarkForReference(snapshot, result.ayah.reference);
   const [planned, setPlanned] = useState(false);
   const [status, setStatus] = useState("Study actions remain private by default.");
 
@@ -328,20 +331,16 @@ function SemanticResultCard({
 
       <div className="ayah-actions">
         <div className="ayah-actions__row">
-          <button
-            type="button"
-            className={cn("action-button", bookmarked && "action-button--selected")}
-            aria-pressed={bookmarked}
-            onClick={() => {
-              setBookmarked((value) => !value);
-              setStatus(
-                !bookmarked
-                  ? `${result.ayah.reference} saved to private bookmarks in this preview.`
-                  : `${result.ayah.reference} removed from private bookmarks in this preview.`,
-              );
-            }}
-          >
-            {bookmarked ? "Bookmarked" : "Bookmark"}
+        <button
+          type="button"
+          className={cn("action-button", bookmarked && "action-button--selected")}
+          aria-pressed={bookmarked}
+          onClick={() => {
+            const outcome = toggleBookmark({ reference: result.ayah.reference });
+            setStatus(outcome.message);
+          }}
+        >
+          {bookmarked ? "Bookmarked" : "Bookmark"}
           </button>
           <button
             type="button"
