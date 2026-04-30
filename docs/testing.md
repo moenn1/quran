@@ -16,7 +16,7 @@ QuranKit needs layered verification across repository quality, backend behavior,
 
 - Unit tests should cover parsers, service objects, validation logic, and API handlers.
 - Integration tests should run against PostgreSQL for persistence, privacy defaults, and attribution behavior.
-- Contract tests should verify exact-search responses, source attribution, and clear semantic-search disclaimers.
+- Contract tests should verify exact-search responses, semantic-search responses, source attribution, and clear similarity-only disclaimers.
 - The current backend baseline lives in `apps/api`.
 - `./scripts/run-backend-tests.sh` prefers `.venv/bin/python` when it exists, falls back to `apps/api/.venv/bin/python` or `python3`, and runs `python -m pytest` in `apps/api`.
 
@@ -32,6 +32,7 @@ The current API test suite covers:
 - locked-source validation, normalized load, and export coverage using a zipped SQL fixture
 - browse endpoint coverage for surah, ayah, juz, hizb, page, random lookup, invalid ayah references, and database-unavailable error handling
 - exact-search endpoint coverage for field selection, edition filters, language filters, pagination, highlights, and invalid query handling
+- semantic-search endpoint coverage for disclaimer wording, translation attribution, scope filters, optional scores, context references, and invalid scope or edition handling
 
 ## CLI
 

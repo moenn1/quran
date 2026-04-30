@@ -9,8 +9,8 @@ QuranKit's API currently exists in two layers:
 
 - The bootstrap Docker service only exposes `GET /` and `GET /health` today.
 - The versioned `/api/v1/...` routes remain the long-term production contract and the surface the CLI expects in `mode=remote`.
-- `apps/api` now implements versioned health, browse, and exact-search endpoints against a migrated QuranKit database.
-- `/api/v1/search/semantic` and authenticated `/api/v1/me/study` endpoints remain planned contract surfaces and are not implemented in `apps/api` yet.
+- `apps/api` now implements versioned health, browse, exact-search, and semantic-search endpoints against a migrated QuranKit database.
+- Authenticated `/api/v1/me/study` endpoints remain planned contract surfaces and are not implemented in `apps/api` yet.
 - Use [docs/self-hosting.md](self-hosting.md), [docs/semantic-search.md](semantic-search.md), and [docs/reading-tracker.md](reading-tracker.md) for the operational details that sit around this contract.
 
 ## Design Rules
@@ -53,6 +53,7 @@ Current database-backed endpoints:
 - `GET /api/v1/hizb/{number}`
 - `GET /api/v1/pages/{number}`
 - `GET /api/v1/search/exact`
+- `GET /api/v1/search/semantic`
 - `GET /docs`
 - `GET /openapi.json`
 
@@ -141,13 +142,45 @@ Exact-search responses include:
 - `translation_attribution` when the request is scoped to one translation edition
 - `edition_attributions` for the edition rows represented in the current page
 
-## Planned Contract Surfaces
+## Semantic Search Contract
 
-### Semantic Search
+`GET /api/v1/search/semantic` accepts:
 
-- `GET /api/v1/search/semantic` remains a planned endpoint for related passages ranked by textual similarity only, never interpretation.
-- Semantic-search responses must keep the disclaimer explicit: related passages are similarity-ranked text matches, not tafsir, fatwa, or religious rulings.
-- Planned responses should include `query`, `match_type`, `disclaimer`, `results`, `arabic_source`, `translation_attribution`, and optional similarity scores.
+- `q`: required textual cue after QuranKit whitespace normalization
+- `translation`: optional upstream text translation identifier such as `en.sahih`
+- `limit`: defaults to `5`, max `100`
+- `threshold`: optional similarity floor from `0.0` to `1.0`, defaults to `0.12`
+- `include_scores`: optional boolean, defaults to `false`
+- `search_scope`: optional scope selector with `all`, `surah`, `juz`, `hizb`, or `page`
+- `surah`, `juz`, `hizb`, `page`: optional scope-reference parameter matching the selected `search_scope`
+
+Semantic-search behavior:
+
+- QuranKit ranks related passages by deterministic textual similarity over the stored Arabic ayah text plus one selected translation edition when `translation` is provided.
+- The current backend uses token overlap, near-token matching, and a small `SequenceMatcher` boost. It is a ranking aid, not interpretation.
+- `translation` currently supports text translation editions only. Quran simple-text editions remain available through exact search.
+- `search_scope=all` does not accept additional scope-reference filters.
+- Scoped searches require exactly one matching scope-reference parameter.
+- Results are sorted by descending similarity score and then canonical ayah order.
+
+Semantic-search responses include:
+
+- `query`, `match_type`, `count`, and the explicit semantic-search `disclaimer`
+- normalized `filters`
+- `results[].ayah` with exact-source Quran text, source attribution, and `translation_text` when a translation edition was searched
+- `results[].reason` with a mechanical explanation of why the result matched
+- `results[].context` with adjacent ayah references for quick verification in the reader
+- optional `results[].similarity_score` when `include_scores=true`
+- top-level `arabic_source`
+- `translation_attribution` when the request is scoped to one translation edition
+
+The canonical disclaimer wording is:
+
+```text
+Related passages are ranked by textual similarity only. They are not tafsir, fatwa, or religious rulings.
+```
+
+## Remaining Planned Contract Surfaces
 
 ### Private Study State
 
@@ -174,6 +207,7 @@ Useful URLs after startup:
 - `http://127.0.0.1:8000/api/v1/ayahs/1`
 - `http://127.0.0.1:8000/api/v1/ayahs/2:255`
 - `http://127.0.0.1:8000/api/v1/search/exact?q=book&translation=en.sahih`
+- `http://127.0.0.1:8000/api/v1/search/semantic?q=book&translation=en.sahih&include_scores=true`
 - `http://127.0.0.1:8000/docs`
 - `http://127.0.0.1:8000/openapi.json`
 
@@ -181,7 +215,7 @@ Useful URLs after startup:
 
 - Quran text preservation is enforced in the data pipeline and browse API by returning the stored source text without local rewriting.
 - Source attribution remains required for Quran text, translations, and sourced metadata.
-- Semantic search is described as textual similarity only, not tafsir, fatwa, or religious ruling.
+- Semantic search is described as textual similarity only, not tafsir, fatwa, or religious rulings.
 - Bookmarks, notes, and reading progress remain private-by-default requirements for future authenticated endpoints.
 
 ## Limitations Before Release
@@ -189,6 +223,7 @@ Useful URLs after startup:
 - The Docker bootstrap API is not a drop-in implementation of `mode=remote` yet.
 - Remote study-state sync is contract-first; the current Compose stack proves health and safety defaults, not a full authenticated API.
 - Semantic search must be described as textual similarity only. The API must not frame those results as tafsir, fatwa, or religious interpretation.
+- The current similarity backend is deterministic textual ranking inside `apps/api`; optional vector infrastructure remains future self-hosting work.
 - Translation and audio exposure remain gated by attribution and rights review. See [docs/database.md](database.md).
 
 ## Self-Hosting References

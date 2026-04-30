@@ -33,7 +33,7 @@ services:
       QURANKIT_DATABASE_URL: postgresql://${POSTGRES_USER:-qurankit}:${POSTGRES_PASSWORD:-qurankit}@db:5432/${POSTGRES_DB:-qurankit}
       QURANKIT_SOURCE_ATTRIBUTION_REQUIRED: ${QURANKIT_SOURCE_ATTRIBUTION_REQUIRED:-true}
       QURANKIT_PRIVACY_MODE: ${QURANKIT_PRIVACY_MODE:-private-by-default}
-      QURANKIT_SEMANTIC_SEARCH_DISCLAIMER: Semantic search is textual similarity, not tafsir, fatwa, or religious ruling.
+      QURANKIT_SEMANTIC_SEARCH_DISCLAIMER: Related passages are ranked by textual similarity only. They are not tafsir, fatwa, or religious rulings.
     ports:
       - "${API_PORT:-8000}:8000"
 

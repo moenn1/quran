@@ -24,8 +24,8 @@ class Settings(BaseSettings):
     privacy_mode: str = "private-by-default"
     source_attribution_required: bool = True
     semantic_search_disclaimer: str = (
-        "Semantic search returns textually similar passages only and must not be read as tafsir, "
-        "fatwa, or a religious ruling."
+        "Related passages are ranked by textual similarity only. They are not tafsir, "
+        "fatwa, or religious rulings."
     )
     database_url: str | None = None
     support_email: str = "mohamed.enn2001@gmail.com"

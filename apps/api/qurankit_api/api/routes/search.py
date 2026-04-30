@@ -5,11 +5,18 @@ from enum import StrEnum
 from typing import TypeAlias
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import case, func, or_, select, union_all
+from sqlalchemy import and_, case, func, or_, select, union_all
 from sqlalchemy.orm import Session
 
+from qurankit_api.core.config import Settings, get_app_settings
 from qurankit_api.core.errors import ApiError
-from qurankit_api.core.search import build_highlight, clean_search_query, normalize_search_text
+from qurankit_api.core.search import (
+    DEFAULT_SEMANTIC_THRESHOLD,
+    build_highlight,
+    clean_search_query,
+    normalize_search_text,
+    semantic_similarity,
+)
 from qurankit_api.db.dependencies import get_db_session
 from qurankit_api.models import Ayah, AyahTranslation, SourceRelease, Surah, Translation
 from qurankit_api.schemas.browse import (
@@ -26,16 +33,25 @@ from qurankit_api.schemas.search import (
     SearchField,
     SearchFilters,
     SearchHighlight,
+    SemanticAyahResource,
+    SemanticContextReferences,
+    SemanticSearchFilters,
+    SemanticSearchHitResource,
+    SemanticSearchResponse,
+    SemanticSearchScope,
 )
 
 
 AyahRow: TypeAlias = tuple[Ayah, Surah, SourceRelease]
+SemanticAyahRow: TypeAlias = tuple[Ayah, Surah, SourceRelease, AyahTranslation | None]
 
 SEARCH_LIMIT_DEFAULT = 20
 SEARCH_LIMIT_MAX = 100
+SEMANTIC_LIMIT_DEFAULT = 5
 HIGHLIGHT_LIMIT_PER_AYAH = 6
 HIGHLIGHT_LIMIT_PER_FIELD = 3
 MATCH_AYAH_ID_COLUMN = "ayah_global_number"
+MAX_GLOBAL_AYAH_NUMBER = 6236
 SEARCH_FIELD_ALIASES = {
     "normalized_text": SearchField.simple_text,
 }
@@ -111,6 +127,29 @@ def _ayah_resource(ayah: Ayah, surah: Surah, source_release: SourceRelease) -> A
     )
 
 
+def _semantic_ayah_resource(
+    ayah: Ayah,
+    surah: Surah,
+    source_release: SourceRelease,
+    *,
+    translation_text: str | None,
+) -> SemanticAyahResource:
+    return SemanticAyahResource(
+        reference=f"{ayah.surah_number}:{ayah.ayah_number}",
+        global_ayah_number=ayah.global_ayah_number,
+        ayah_number=ayah.ayah_number,
+        text=ayah.text,
+        translation_text=translation_text,
+        page_number=ayah.page_number,
+        juz_number=ayah.juz_number,
+        hizb_number=ayah.hizb_number,
+        rub_el_hizb_number=ayah.rub_el_hizb_number,
+        sajda=ayah.sajda,
+        surah=_ayah_surah_summary(surah),
+        source=_source_resource(source_release),
+    )
+
+
 def _edition_attribution(translation: Translation) -> EditionAttribution:
     return EditionAttribution(
         id=translation.id,
@@ -172,6 +211,58 @@ def _unsupported_search_edition(identifier: str, edition_type: str) -> ApiError:
     )
 
 
+def _unsupported_semantic_edition(
+    identifier: str,
+    edition_type: str,
+    edition_format: str,
+) -> ApiError:
+    return ApiError(
+        status_code=422,
+        code="unsupported_search_edition",
+        message=(
+            "Semantic search currently supports the Quran source text and one text "
+            "translation edition at a time."
+        ),
+        details={
+            "translation_identifier": identifier,
+            "edition_type": edition_type,
+            "format": edition_format,
+        },
+    )
+
+
+def _invalid_search_scope(
+    search_scope: SemanticSearchScope,
+    *,
+    expected_filter: str | None,
+    provided_filters: dict[str, int],
+) -> ApiError:
+    if expected_filter is None:
+        message = (
+            "Search scope `all` does not accept `surah`, `juz`, `hizb`, or `page` "
+            "filters."
+        )
+    else:
+        message = (
+            f"Search scope `{search_scope.value}` requires `{expected_filter}` and "
+            "does not accept other scope filters."
+        )
+
+    details: dict[str, object] = {
+        "search_scope": search_scope.value,
+        "provided_filters": provided_filters,
+    }
+    if expected_filter is not None:
+        details["expected_filter"] = expected_filter
+
+    return ApiError(
+        status_code=422,
+        code="invalid_search_scope",
+        message=message,
+        details=details,
+    )
+
+
 def _parse_search_fields(raw_fields: list[str] | None) -> list[SearchField]:
     if raw_fields is None:
         return []
@@ -229,6 +320,27 @@ def _resolve_translation_filter(
         raise _unsupported_search_edition(
             translation_identifier,
             translation.edition_type,
+        )
+
+    return translation
+
+
+def _resolve_semantic_translation_filter(
+    session: Session,
+    translation_identifier: str | None,
+) -> Translation | None:
+    translation = _resolve_translation_filter(session, translation_identifier)
+    if translation is None:
+        return None
+
+    if (
+        translation.edition_type != SupportedEditionType.translation.value
+        or translation.format != "text"
+    ):
+        raise _unsupported_semantic_edition(
+            translation.upstream_identifier,
+            translation.edition_type,
+            translation.format,
         )
 
     return translation
@@ -321,6 +433,150 @@ def _edition_match_id_select(
         statement = statement.where(Translation.id == translation_filter.id)
 
     return statement
+
+
+def _semantic_scope_filters(
+    *,
+    search_scope: SemanticSearchScope,
+    translation_identifier: str | None,
+    surah_number: int | None,
+    juz_number: int | None,
+    hizb_number: int | None,
+    page_number: int | None,
+    threshold: float,
+    include_scores: bool,
+) -> tuple[SemanticSearchFilters, list[object]]:
+    provided_filters = {
+        name: value
+        for name, value in {
+            "surah": surah_number,
+            "juz": juz_number,
+            "hizb": hizb_number,
+            "page": page_number,
+        }.items()
+        if value is not None
+    }
+
+    filters = SemanticSearchFilters(
+        search_scope=search_scope,
+        translation_identifier=translation_identifier,
+        surah_number=surah_number if search_scope == SemanticSearchScope.surah else None,
+        juz_number=juz_number if search_scope == SemanticSearchScope.juz else None,
+        hizb_number=hizb_number if search_scope == SemanticSearchScope.hizb else None,
+        page_number=page_number if search_scope == SemanticSearchScope.page else None,
+        threshold=threshold,
+        include_scores=include_scores,
+    )
+
+    if search_scope == SemanticSearchScope.all:
+        if provided_filters:
+            raise _invalid_search_scope(
+                search_scope,
+                expected_filter=None,
+                provided_filters=provided_filters,
+            )
+        return filters, []
+
+    expected_filter = {
+        SemanticSearchScope.surah: "surah",
+        SemanticSearchScope.juz: "juz",
+        SemanticSearchScope.hizb: "hizb",
+        SemanticSearchScope.page: "page",
+    }[search_scope]
+    if provided_filters.get(expected_filter) is None or len(provided_filters) != 1:
+        raise _invalid_search_scope(
+            search_scope,
+            expected_filter=expected_filter,
+            provided_filters=provided_filters,
+        )
+
+    condition = {
+        SemanticSearchScope.surah: Ayah.surah_number == surah_number,
+        SemanticSearchScope.juz: Ayah.juz_number == juz_number,
+        SemanticSearchScope.hizb: Ayah.hizb_number == hizb_number,
+        SemanticSearchScope.page: Ayah.page_number == page_number,
+    }[search_scope]
+    return filters, [condition]
+
+
+def _semantic_candidate_rows(
+    session: Session,
+    *,
+    translation_filter: Translation | None,
+    conditions: list[object],
+) -> list[SemanticAyahRow]:
+    if translation_filter is None:
+        rows = list(
+            session.execute(
+                select(Ayah, Surah, SourceRelease)
+                .join(Surah, Ayah.surah_number == Surah.surah_number)
+                .join(SourceRelease, Ayah.source_release_id == SourceRelease.id)
+                .where(*conditions)
+                .order_by(Ayah.global_ayah_number),
+            ),
+        )
+        return [
+            (ayah, surah, source_release, None)
+            for ayah, surah, source_release in rows
+        ]
+
+    return list(
+        session.execute(
+            select(Ayah, Surah, SourceRelease, AyahTranslation)
+            .join(Surah, Ayah.surah_number == Surah.surah_number)
+            .join(SourceRelease, Ayah.source_release_id == SourceRelease.id)
+            .outerjoin(
+                AyahTranslation,
+                and_(
+                    AyahTranslation.ayah_global_number == Ayah.global_ayah_number,
+                    AyahTranslation.translation_id == translation_filter.id,
+                ),
+            )
+            .where(*conditions)
+            .order_by(Ayah.global_ayah_number),
+        ),
+    )
+
+
+def _semantic_context_references(
+    session: Session,
+    ayah_ids: list[int],
+) -> dict[int, SemanticContextReferences]:
+    if not ayah_ids:
+        return {}
+
+    context_ids = sorted(
+        {
+            candidate
+            for ayah_id in ayah_ids
+            for candidate in (ayah_id - 1, ayah_id + 1)
+            if 1 <= candidate <= MAX_GLOBAL_AYAH_NUMBER
+        },
+    )
+    if not context_ids:
+        return {}
+
+    reference_rows = list(
+        session.execute(
+            select(
+                Ayah.global_ayah_number,
+                Ayah.surah_number,
+                Ayah.ayah_number,
+            ).where(Ayah.global_ayah_number.in_(context_ids)),
+        ),
+    )
+    reference_by_id = {
+        global_ayah_number: f"{surah_number}:{ayah_number}"
+        for global_ayah_number, surah_number, ayah_number in reference_rows
+    }
+
+    return {
+        ayah_id: SemanticContextReferences(
+            previous_reference=reference_by_id.get(ayah_id - 1),
+            next_reference=reference_by_id.get(ayah_id + 1),
+        )
+        for ayah_id in ayah_ids
+    }
 
 
 @router.get(
@@ -571,4 +827,133 @@ async def search_exact(
         arabic_source=arabic_source,
         translation_attribution=translation_attribution,
         edition_attributions=list(edition_attributions.values()),
+    )
+
+
+@router.get(
+    "/search/semantic",
+    response_model=SemanticSearchResponse,
+    response_model_exclude_none=True,
+    responses=SEARCH_ERROR_RESPONSES,
+    summary="Find related passages by textual similarity",
+)
+async def search_semantic(
+    q: str = Query(..., description="Textual cue used to find related passages."),
+    translation: str | None = Query(
+        None,
+        description=(
+            "Optional text translation edition identifier, such as `en.sahih`, "
+            "used alongside the Arabic source text for similarity ranking."
+        ),
+    ),
+    limit: int = Query(SEMANTIC_LIMIT_DEFAULT, ge=1, le=SEARCH_LIMIT_MAX),
+    threshold: float = Query(
+        DEFAULT_SEMANTIC_THRESHOLD,
+        ge=0.0,
+        le=1.0,
+        description="Minimum similarity score required for a result.",
+    ),
+    include_scores: bool = Query(
+        False,
+        description="Include numeric similarity scores in the response.",
+    ),
+    search_scope: SemanticSearchScope = Query(
+        SemanticSearchScope.all,
+        description=(
+            "Restrict candidate ayat to all ayat, one surah, one juz, one hizb, "
+            "or one page."
+        ),
+    ),
+    surah: int | None = Query(None, ge=1, le=114),
+    juz: int | None = Query(None, ge=1, le=30),
+    hizb: int | None = Query(None, ge=1, le=60),
+    page: int | None = Query(None, ge=1, le=604),
+    settings: Settings = Depends(get_app_settings),
+    session: Session = Depends(get_db_session),
+) -> SemanticSearchResponse:
+    try:
+        cleaned_query = clean_search_query(q)
+    except ValueError as exc:
+        raise _invalid_search_query() from exc
+
+    translation_identifier = _normalized_filter_value(translation)
+    translation_filter = _resolve_semantic_translation_filter(
+        session,
+        translation_identifier,
+    )
+    filters, conditions = _semantic_scope_filters(
+        search_scope=search_scope,
+        translation_identifier=translation_identifier,
+        surah_number=surah,
+        juz_number=juz,
+        hizb_number=hizb,
+        page_number=page,
+        threshold=threshold,
+        include_scores=include_scores,
+    )
+
+    candidate_rows = _semantic_candidate_rows(
+        session,
+        translation_filter=translation_filter,
+        conditions=conditions,
+    )
+
+    scored_hits: list[tuple[float, str, SemanticAyahRow]] = []
+    for ayah, surah_row, source_release, ayah_translation in candidate_rows:
+        translation_text = ayah_translation.text if ayah_translation is not None else None
+        score, reason = semantic_similarity(cleaned_query, ayah.text, translation_text)
+        if score < threshold or not reason:
+            continue
+
+        scored_hits.append(
+            (
+                score,
+                reason,
+                (ayah, surah_row, source_release, ayah_translation),
+            ),
+        )
+
+    scored_hits.sort(
+        key=lambda item: (-item[0], item[2][0].global_ayah_number),
+    )
+    selected_hits = scored_hits[:limit]
+    context_by_id = _semantic_context_references(
+        session,
+        [item[2][0].global_ayah_number for item in selected_hits],
+    )
+
+    results = [
+        SemanticSearchHitResource(
+            ayah=_semantic_ayah_resource(
+                ayah,
+                surah_row,
+                source_release,
+                translation_text=ayah_translation.text if ayah_translation is not None else None,
+            ),
+            reason=reason,
+            context=context_by_id.get(
+                ayah.global_ayah_number,
+                SemanticContextReferences(),
+            ),
+            similarity_score=score if include_scores else None,
+        )
+        for score, reason, (ayah, surah_row, source_release, ayah_translation) in selected_hits
+    ]
+
+    arabic_source = None
+    if selected_hits:
+        arabic_source = _source_resource(selected_hits[0][2][2])
+
+    translation_attribution = None
+    if translation_filter is not None:
+        translation_attribution = _edition_attribution(translation_filter)
+
+    return SemanticSearchResponse(
+        query=cleaned_query,
+        count=len(results),
+        disclaimer=settings.semantic_search_disclaimer,
+        filters=filters,
+        results=results,
+        arabic_source=arabic_source,
+        translation_attribution=translation_attribution,
     )
