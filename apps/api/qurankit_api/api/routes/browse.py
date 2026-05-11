@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from qurankit_api.core.errors import ApiError
 from qurankit_api.db.dependencies import get_db_session
-from qurankit_api.models import Ayah, SourceRelease, Surah
+from qurankit_api.models import Ayah, AyahTranslation, SourceRelease, Surah, Translation
 from qurankit_api.schemas.browse import (
     AyahResource,
     AyahSurahSummary,
@@ -21,6 +21,8 @@ from qurankit_api.schemas.browse import (
     SurahAyahListResponse,
     SurahListResponse,
     SurahResource,
+    TranslatedAyahResource,
+    TranslationAttribution,
 )
 from qurankit_api.schemas.errors import COMMON_ERROR_RESPONSES, ErrorEnvelope
 
@@ -67,6 +69,22 @@ def _source_resource(source_release: SourceRelease) -> SourceAttribution:
     )
 
 
+def _translation_resource(translation: Translation) -> TranslationAttribution:
+    return TranslationAttribution(
+        id=translation.id,
+        upstream_identifier=translation.upstream_identifier,
+        language_code=translation.language_code,
+        translation_name=translation.translation_name,
+        english_name=translation.english_name,
+        format=translation.format,
+        edition_type=translation.edition_type,
+        attribution_text=translation.attribution_text,
+        attribution_url=translation.attribution_url,
+        review_status=translation.review_status.value,
+        is_public=translation.is_public,
+    )
+
+
 def _ayah_surah_summary(surah: Surah) -> AyahSurahSummary:
     return AyahSurahSummary(
         surah_number=surah.surah_number,
@@ -101,6 +119,21 @@ def _ayah_resource(ayah: Ayah, surah: Surah, source_release: SourceRelease) -> A
     )
 
 
+def _translated_ayah_resource(
+    ayah: Ayah,
+    surah: Surah,
+    source_release: SourceRelease,
+    *,
+    translation_text: str | None,
+    translation_attribution: TranslationAttribution | None,
+) -> TranslatedAyahResource:
+    return TranslatedAyahResource(
+        **_ayah_resource(ayah, surah, source_release).model_dump(),
+        translation_text=translation_text,
+        translation_attribution=translation_attribution,
+    )
+
+
 def _surah_not_found(surah_number: int) -> ApiError:
     return ApiError(
         status_code=404,
@@ -126,6 +159,60 @@ def _collection_not_found(code: str, label: str, number: int) -> ApiError:
         message=f"{label} {number} has no ayahs in the current QuranKit dataset.",
         details={f"{label.lower()}_number": number},
     )
+
+
+def _translation_not_found(identifier: str) -> ApiError:
+    return ApiError(
+        status_code=404,
+        code="translation_not_found",
+        message=f"Translation edition `{identifier}` was not found.",
+        details={"translation_identifier": identifier},
+    )
+
+
+def _unsupported_translation(identifier: str, edition_type: str, edition_format: str) -> ApiError:
+    return ApiError(
+        status_code=422,
+        code="unsupported_translation_edition",
+        message="Browse translation must reference a text translation edition.",
+        details={
+            "translation_identifier": identifier,
+            "edition_type": edition_type,
+            "format": edition_format,
+        },
+    )
+
+
+def _normalized_translation_identifier(value: str | None) -> str | None:
+    if value is None:
+        return None
+
+    normalized = value.strip().lower()
+    return normalized or None
+
+
+def _resolve_translation_filter(
+    session: Session,
+    translation_identifier: str | None,
+) -> Translation | None:
+    normalized_identifier = _normalized_translation_identifier(translation_identifier)
+    if normalized_identifier is None:
+        return None
+
+    translation = session.scalar(
+        select(Translation).where(Translation.upstream_identifier == normalized_identifier),
+    )
+    if translation is None:
+        raise _translation_not_found(normalized_identifier)
+
+    if translation.edition_type != "translation" or translation.format != "text":
+        raise _unsupported_translation(
+            translation.upstream_identifier,
+            translation.edition_type,
+            translation.format,
+        )
+
+    return translation
 
 
 def _get_surah(session: Session, surah_number: int) -> tuple[Surah, SourceRelease]:
@@ -204,6 +291,30 @@ def _ayah_rows_for_collection(
     )
 
 
+def _translation_text_map(
+    session: Session,
+    *,
+    ayahs: list[Ayah],
+    translation: Translation | None,
+) -> dict[int, str]:
+    if translation is None or not ayahs:
+        return {}
+
+    rows = session.execute(
+        select(AyahTranslation.ayah_global_number, AyahTranslation.text).where(
+            AyahTranslation.translation_id == translation.id,
+            AyahTranslation.ayah_global_number.in_(
+                [ayah.global_ayah_number for ayah in ayahs],
+            ),
+        ),
+    ).all()
+
+    return {
+        global_ayah_number: text
+        for global_ayah_number, text in rows
+    }
+
+
 @router.get(
     "/surahs",
     response_model=SurahListResponse,
@@ -247,6 +358,7 @@ async def read_surah(
 @router.get(
     "/surahs/{surah_number}/ayahs",
     response_model=SurahAyahListResponse,
+    response_model_exclude_none=True,
     responses=BROWSE_ERROR_RESPONSES,
     summary="List ayahs in a surah",
 )
@@ -254,9 +366,14 @@ async def list_surah_ayahs(
     surah_number: int = Path(..., ge=1, le=114),
     limit: int = Query(AYAH_LIST_LIMIT_DEFAULT, ge=1, le=AYAH_LIST_LIMIT_MAX),
     offset: int = Query(0, ge=0),
+    translation: str | None = Query(
+        None,
+        description="Optional upstream text translation identifier, such as `en.sahih`.",
+    ),
     session: Session = Depends(get_db_session),
 ) -> SurahAyahListResponse:
     surah, source_release = _get_surah(session, surah_number)
+    translation_filter = _resolve_translation_filter(session, translation)
     rows = list(
         session.execute(
             select(Ayah, Surah, SourceRelease)
@@ -268,23 +385,46 @@ async def list_surah_ayahs(
             .offset(offset),
         ),
     )
+    translation_attribution = (
+        _translation_resource(translation_filter) if translation_filter is not None else None
+    )
+    translation_texts = _translation_text_map(
+        session,
+        ayahs=[ayah for ayah, _, _ in rows],
+        translation=translation_filter,
+    )
 
     return SurahAyahListResponse(
         surah=_surah_resource(surah, source_release),
-        items=[_ayah_resource(ayah, row_surah, row_source) for ayah, row_surah, row_source in rows],
+        items=[
+            _translated_ayah_resource(
+                ayah,
+                row_surah,
+                row_source,
+                translation_text=translation_texts.get(ayah.global_ayah_number),
+                translation_attribution=translation_attribution,
+            )
+            for ayah, row_surah, row_source in rows
+        ],
         pagination=_pagination(surah.ayah_count, limit, offset),
     )
 
 
 @router.get(
     "/ayahs/random",
-    response_model=AyahResource,
+    response_model=TranslatedAyahResource,
+    response_model_exclude_none=True,
     responses=BROWSE_ERROR_RESPONSES,
     summary="Read a random ayah",
 )
 async def read_random_ayah(
+    translation: str | None = Query(
+        None,
+        description="Optional upstream text translation identifier, such as `en.sahih`.",
+    ),
     session: Session = Depends(get_db_session),
-) -> AyahResource:
+) -> TranslatedAyahResource:
+    translation_filter = _resolve_translation_filter(session, translation)
     row = session.execute(
         select(Ayah, Surah, SourceRelease)
         .join(Surah, Ayah.surah_number == Surah.surah_number)
@@ -297,26 +437,61 @@ async def read_random_ayah(
         raise _ayah_not_found("random")
 
     ayah, surah, source_release = row
-    return _ayah_resource(ayah, surah, source_release)
+    translation_attribution = (
+        _translation_resource(translation_filter) if translation_filter is not None else None
+    )
+    translation_text = _translation_text_map(
+        session,
+        ayahs=[ayah],
+        translation=translation_filter,
+    ).get(ayah.global_ayah_number)
+    return _translated_ayah_resource(
+        ayah,
+        surah,
+        source_release,
+        translation_text=translation_text,
+        translation_attribution=translation_attribution,
+    )
 
 
 @router.get(
     "/ayahs/{reference}",
-    response_model=AyahResource,
+    response_model=TranslatedAyahResource,
+    response_model_exclude_none=True,
     responses=BROWSE_ERROR_RESPONSES,
     summary="Read an ayah by global or surah-local reference",
 )
 async def read_ayah(
     reference: str,
+    translation: str | None = Query(
+        None,
+        description="Optional upstream text translation identifier, such as `en.sahih`.",
+    ),
     session: Session = Depends(get_db_session),
-) -> AyahResource:
+) -> TranslatedAyahResource:
+    translation_filter = _resolve_translation_filter(session, translation)
     ayah, surah, source_release = _ayah_row_for_reference(session, reference)
-    return _ayah_resource(ayah, surah, source_release)
+    translation_attribution = (
+        _translation_resource(translation_filter) if translation_filter is not None else None
+    )
+    translation_text = _translation_text_map(
+        session,
+        ayahs=[ayah],
+        translation=translation_filter,
+    ).get(ayah.global_ayah_number)
+    return _translated_ayah_resource(
+        ayah,
+        surah,
+        source_release,
+        translation_text=translation_text,
+        translation_attribution=translation_attribution,
+    )
 
 
 @router.get(
     "/juz/{number}",
     response_model=JuzAyahListResponse,
+    response_model_exclude_none=True,
     responses=BROWSE_ERROR_RESPONSES,
     summary="List ayahs in a juz",
 )
@@ -324,8 +499,13 @@ async def list_juz_ayahs(
     number: int = Path(..., ge=1, le=30),
     limit: int = Query(AYAH_LIST_LIMIT_DEFAULT, ge=1, le=AYAH_LIST_LIMIT_MAX),
     offset: int = Query(0, ge=0),
+    translation: str | None = Query(
+        None,
+        description="Optional upstream text translation identifier, such as `en.sahih`.",
+    ),
     session: Session = Depends(get_db_session),
 ) -> JuzAyahListResponse:
+    translation_filter = _resolve_translation_filter(session, translation)
     total = int(
         session.scalar(
             select(func.count()).select_from(Ayah).where(Ayah.juz_number == number),
@@ -341,10 +521,27 @@ async def list_juz_ayahs(
         limit=limit,
         offset=offset,
     )
+    translation_attribution = (
+        _translation_resource(translation_filter) if translation_filter is not None else None
+    )
+    translation_texts = _translation_text_map(
+        session,
+        ayahs=[ayah for ayah, _, _ in rows],
+        translation=translation_filter,
+    )
 
     return JuzAyahListResponse(
         juz_number=number,
-        items=[_ayah_resource(ayah, surah, source_release) for ayah, surah, source_release in rows],
+        items=[
+            _translated_ayah_resource(
+                ayah,
+                surah,
+                source_release,
+                translation_text=translation_texts.get(ayah.global_ayah_number),
+                translation_attribution=translation_attribution,
+            )
+            for ayah, surah, source_release in rows
+        ],
         pagination=_pagination(total, limit, offset),
     )
 
@@ -352,6 +549,7 @@ async def list_juz_ayahs(
 @router.get(
     "/hizb/{number}",
     response_model=HizbAyahListResponse,
+    response_model_exclude_none=True,
     responses=BROWSE_ERROR_RESPONSES,
     summary="List ayahs in a hizb",
 )
@@ -359,8 +557,13 @@ async def list_hizb_ayahs(
     number: int = Path(..., ge=1, le=60),
     limit: int = Query(AYAH_LIST_LIMIT_DEFAULT, ge=1, le=AYAH_LIST_LIMIT_MAX),
     offset: int = Query(0, ge=0),
+    translation: str | None = Query(
+        None,
+        description="Optional upstream text translation identifier, such as `en.sahih`.",
+    ),
     session: Session = Depends(get_db_session),
 ) -> HizbAyahListResponse:
+    translation_filter = _resolve_translation_filter(session, translation)
     total = int(
         session.scalar(
             select(func.count()).select_from(Ayah).where(Ayah.hizb_number == number),
@@ -376,10 +579,27 @@ async def list_hizb_ayahs(
         limit=limit,
         offset=offset,
     )
+    translation_attribution = (
+        _translation_resource(translation_filter) if translation_filter is not None else None
+    )
+    translation_texts = _translation_text_map(
+        session,
+        ayahs=[ayah for ayah, _, _ in rows],
+        translation=translation_filter,
+    )
 
     return HizbAyahListResponse(
         hizb_number=number,
-        items=[_ayah_resource(ayah, surah, source_release) for ayah, surah, source_release in rows],
+        items=[
+            _translated_ayah_resource(
+                ayah,
+                surah,
+                source_release,
+                translation_text=translation_texts.get(ayah.global_ayah_number),
+                translation_attribution=translation_attribution,
+            )
+            for ayah, surah, source_release in rows
+        ],
         pagination=_pagination(total, limit, offset),
     )
 
@@ -387,6 +607,7 @@ async def list_hizb_ayahs(
 @router.get(
     "/pages/{number}",
     response_model=PageAyahListResponse,
+    response_model_exclude_none=True,
     responses=BROWSE_ERROR_RESPONSES,
     summary="List ayahs on a mushaf page",
 )
@@ -394,8 +615,13 @@ async def list_page_ayahs(
     number: int = Path(..., ge=1, le=604),
     limit: int = Query(AYAH_LIST_LIMIT_DEFAULT, ge=1, le=AYAH_LIST_LIMIT_MAX),
     offset: int = Query(0, ge=0),
+    translation: str | None = Query(
+        None,
+        description="Optional upstream text translation identifier, such as `en.sahih`.",
+    ),
     session: Session = Depends(get_db_session),
 ) -> PageAyahListResponse:
+    translation_filter = _resolve_translation_filter(session, translation)
     total = int(
         session.scalar(
             select(func.count()).select_from(Ayah).where(Ayah.page_number == number),
@@ -411,9 +637,26 @@ async def list_page_ayahs(
         limit=limit,
         offset=offset,
     )
+    translation_attribution = (
+        _translation_resource(translation_filter) if translation_filter is not None else None
+    )
+    translation_texts = _translation_text_map(
+        session,
+        ayahs=[ayah for ayah, _, _ in rows],
+        translation=translation_filter,
+    )
 
     return PageAyahListResponse(
         page_number=number,
-        items=[_ayah_resource(ayah, surah, source_release) for ayah, surah, source_release in rows],
+        items=[
+            _translated_ayah_resource(
+                ayah,
+                surah,
+                source_release,
+                translation_text=translation_texts.get(ayah.global_ayah_number),
+                translation_attribution=translation_attribution,
+            )
+            for ayah, surah, source_release in rows
+        ],
         pagination=_pagination(total, limit, offset),
     )

@@ -29,7 +29,7 @@ qurankit progress mark 1:1-7
 qurankit plan today
 ```
 
-The CLI is usable in local-first mode now. Remote API mode is already documented, but it expects a future full QuranKit API contract rather than the current bootstrap container.
+The CLI works in local SQLite mode today and now speaks the live database-backed `apps/api` contract for remote Quran lookup and search. The lightweight Docker bootstrap API used by Compose smoke checks still only exposes `/` and `/health`.
 
 ## Current Commands
 
@@ -111,18 +111,20 @@ The CLI is usable in local-first mode now. Remote API mode is already documented
 
 `mode=remote` uses the configured QuranKit HTTP base URL and expects versioned endpoints for:
 
-- `/api/v1/surahs/{surahNumber}`
+- `/api/v1/surahs/{surahNumber}/ayahs`
 - `/api/v1/ayahs/{surah}:{ayah}`
-- `/api/v1/juzs/{juzNumber}`
+- `/api/v1/juz/{juzNumber}`
 - `/api/v1/ayahs/random`
 - `/api/v1/search/exact?q=...&translation=...&limit=...`
 - `/api/v1/search/semantic?q=...&translation=...&limit=...`
 
-The CLI also builds ayah-range validation from the surah endpoints so plan and progress ranges can be checked before they are saved.
+Ayah-returning browse routes accept the optional `translation` query used by the CLI, so remote `surah`, `ayah`, `juz`, and `random` commands can preserve both translation output and attribution.
+
+The CLI also builds ayah-range validation from the surah-ayah collection endpoints so plan and progress ranges can be checked before they are saved.
 
 Responses should include Quran source attribution and selected translation attribution whenever Quran text is returned.
 
-The Docker bootstrap API does not implement this contract yet. It only exposes `/` and `/health` for self-hosting smoke checks, so `mode=remote` currently requires a compatible future QuranKit API deployment or a contract-matching stub.
+The database-backed `apps/api` service implements this lookup/search contract now. The Docker bootstrap API used by smoke checks still does not; it remains a health-and-safety surface only.
 
 ### Local SQLite Mode
 
@@ -247,7 +249,7 @@ qurankit export surah 1 --format text --output exports/surah-1.txt
 
 ## Limitations and Operational Notes
 
-- `mode=remote` is contract-ready, but the repository's current Docker bootstrap API only proves `/` and `/health`.
+- `mode=remote` works against the database-backed `apps/api` service. The repository's Docker bootstrap API still only proves `/` and `/health`.
 - `state-mode=remote` requires an authenticated `/api/v1/me/study` implementation and a valid bearer token.
 - `mode=local` expects a prepared SQLite file with `surahs` and `ayahs`, and also `editions` plus `ayah_edition` when translation-aware output is enabled.
 - Local private study state is stored as a JSON file under the configured study-state path. Private by default does not mean encrypted, so local filesystem permissions still matter.

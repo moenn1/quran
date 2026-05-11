@@ -6,16 +6,9 @@ from pathlib import Path
 import pytest
 
 from qurankit.backends import (
-    AyahRecord,
     BackendNotFoundError,
-    ExactSearchHit,
-    ExactSearchResult,
     LocalSQLiteBackend,
     RemoteBackend,
-    SemanticSearchHit,
-    SemanticSearchResult,
-    SurahResult,
-    TranslationAttribution,
     select_backend,
 )
 from qurankit.config import BackendMode, Settings, StateMode
@@ -107,45 +100,91 @@ def test_local_sqlite_backend_requires_known_translation(
 
 def test_remote_backend_uses_versioned_search_endpoints() -> None:
     requested_urls: list[str] = []
-    sample_ayah = AyahRecord(
-        surah_number=1,
-        ayah_number=6,
-        surah_name_arabic="ٱلْفَاتِحَةِ",
-        surah_name_english="Al-Fatihah",
-        surah_name_translation="The Opening",
-        revelation_type="Meccan",
-        arabic_text="ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ",
-        translation_text="Guide us to the straight path.",
-        page_number=1,
-        juz_number=1,
-        hizb_number=1,
-        sajda=False,
-    )
-    translation = TranslationAttribution(
-        identifier="en.sahih",
-        language="en",
-        name="Saheeh International",
-        english_name="Saheeh International",
-        edition_type="translation",
-        format="text",
-    )
-    exact_payload = ExactSearchResult(
-        query="guide",
-        results=(ExactSearchHit(ayah=sample_ayah, match_sources=("translation",)),),
-        searched_fields=("arabic_text", "translation"),
-        translation_attribution=translation,
-    ).to_dict()
-    semantic_payload = SemanticSearchResult(
-        query="guide path",
-        results=(
-            SemanticSearchHit(
-                ayah=sample_ayah,
-                similarity_score=0.91,
-                reason="Shared terms in the selected text: guide, path.",
-            ),
-        ),
-        translation_attribution=translation,
-    ).to_dict()
+    exact_payload = {
+        "query": "guide",
+        "count": 1,
+        "searched_fields": ["arabic_text", "translation"],
+        "results": [
+            {
+                "ayah": {
+                    "reference": "1:6",
+                    "ayah_number": 6,
+                    "text": "ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ",
+                    "page_number": 1,
+                    "juz_number": 1,
+                    "hizb_number": 1,
+                    "sajda": False,
+                    "surah": {
+                        "surah_number": 1,
+                        "arabic_name": "ٱلْفَاتِحَةِ",
+                        "english_name": "Al-Fatihah",
+                        "english_name_translation": "The Opening",
+                        "revelation_type": "meccan",
+                    },
+                    "source": {
+                        "source_name": "AbdullahGhanem/quran-database",
+                        "upstream_commit_sha": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
+                    },
+                },
+                "match_sources": ["translation"],
+            }
+        ],
+        "arabic_source": {
+            "source_name": "AbdullahGhanem/quran-database",
+            "upstream_commit_sha": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
+        },
+        "translation_attribution": {
+            "upstream_identifier": "en.sahih",
+            "language_code": "en",
+            "translation_name": "Sahih",
+            "english_name": "Saheeh International",
+            "edition_type": "translation",
+            "format": "text",
+        },
+    }
+    semantic_payload = {
+        "query": "guide path",
+        "count": 1,
+        "results": [
+            {
+                "ayah": {
+                    "reference": "1:6",
+                    "ayah_number": 6,
+                    "text": "ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ",
+                    "translation_text": "Guide us to the straight path.",
+                    "page_number": 1,
+                    "juz_number": 1,
+                    "hizb_number": 1,
+                    "sajda": False,
+                    "surah": {
+                        "surah_number": 1,
+                        "arabic_name": "ٱلْفَاتِحَةِ",
+                        "english_name": "Al-Fatihah",
+                        "english_name_translation": "The Opening",
+                        "revelation_type": "meccan",
+                    },
+                    "source": {
+                        "source_name": "AbdullahGhanem/quran-database",
+                        "upstream_commit_sha": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
+                    },
+                },
+                "similarity_score": 0.91,
+                "reason": "Shared terms in the selected text: guide, path.",
+            }
+        ],
+        "arabic_source": {
+            "source_name": "AbdullahGhanem/quran-database",
+            "upstream_commit_sha": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
+        },
+        "translation_attribution": {
+            "upstream_identifier": "en.sahih",
+            "language_code": "en",
+            "translation_name": "Sahih",
+            "english_name": "Saheeh International",
+            "edition_type": "translation",
+            "format": "text",
+        },
+    }
 
     def opener(request, timeout):
         requested_urls.append(request.full_url)
@@ -171,104 +210,156 @@ def test_remote_backend_uses_versioned_search_endpoints() -> None:
         "https://api.example.test/api/v1/search/semantic?q=guide+path&translation=en.sahih&limit=2",
     ]
     assert exact.results[0].ayah.reference == "1:6"
+    assert exact.translation_attribution is not None
+    assert exact.translation_attribution.identifier == "en.sahih"
     assert semantic.results[0].similarity_score == 0.91
+    assert semantic.translation_attribution is not None
+    assert semantic.translation_attribution.name == "Sahih"
 
 
 def test_remote_backend_builds_ayah_ranges_from_surah_endpoints() -> None:
     requested_urls: list[str] = []
-    translation = TranslationAttribution(
-        identifier="en.sahih",
-        language="en",
-        name="Saheeh International",
-        english_name="Saheeh International",
-        edition_type="translation",
-        format="text",
-    )
-    surah_one = SurahResult(
-        surah_number=1,
-        name_arabic="ٱلْفَاتِحَةِ",
-        name_english="Al-Fatihah",
-        name_translation="The Opening",
-        revelation_type="Meccan",
-        ayahs=(
-            AyahRecord(
-                surah_number=1,
-                ayah_number=5,
-                surah_name_arabic="ٱلْفَاتِحَةِ",
-                surah_name_english="Al-Fatihah",
-                surah_name_translation="The Opening",
-                revelation_type="Meccan",
-                arabic_text="إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
-                translation_text="It is You we worship and You we ask for help.",
-                page_number=1,
-                juz_number=1,
-                hizb_number=1,
-                sajda=False,
-            ),
-            AyahRecord(
-                surah_number=1,
-                ayah_number=6,
-                surah_name_arabic="ٱلْفَاتِحَةِ",
-                surah_name_english="Al-Fatihah",
-                surah_name_translation="The Opening",
-                revelation_type="Meccan",
-                arabic_text="ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ",
-                translation_text="Guide us to the straight path.",
-                page_number=1,
-                juz_number=1,
-                hizb_number=1,
-                sajda=False,
-            ),
-        ),
-        translation_attribution=translation,
-    ).to_dict()
-    surah_two = SurahResult(
-        surah_number=2,
-        name_arabic="ٱلْبَقَرَةِ",
-        name_english="Al-Baqarah",
-        name_translation="The Cow",
-        revelation_type="Medinan",
-        ayahs=(
-            AyahRecord(
-                surah_number=2,
-                ayah_number=1,
-                surah_name_arabic="ٱلْبَقَرَةِ",
-                surah_name_english="Al-Baqarah",
-                surah_name_translation="The Cow",
-                revelation_type="Medinan",
-                arabic_text="الٓمٓ",
-                translation_text="Alif, Lam, Meem.",
-                page_number=2,
-                juz_number=1,
-                hizb_number=1,
-                sajda=False,
-            ),
-            AyahRecord(
-                surah_number=2,
-                ayah_number=2,
-                surah_name_arabic="ٱلْبَقَرَةِ",
-                surah_name_english="Al-Baqarah",
-                surah_name_translation="The Cow",
-                revelation_type="Medinan",
-                arabic_text="ذَٰلِكَ ٱلْكِتَٰبُ لَا رَيْبَ ۛ فِيهِ هُدًى لِّلْمُتَّقِينَ",
-                translation_text=(
+    translation_attribution = {
+        "upstream_identifier": "en.sahih",
+        "language_code": "en",
+        "translation_name": "Sahih",
+        "english_name": "Saheeh International",
+        "edition_type": "translation",
+        "format": "text",
+    }
+    surah_one = {
+        "surah": {
+            "surah_number": 1,
+            "arabic_name": "ٱلْفَاتِحَةِ",
+            "english_name": "Al-Fatihah",
+            "english_name_translation": "The Opening",
+            "revelation_type": "meccan",
+            "ayah_count": 2,
+            "source": {
+                "source_name": "AbdullahGhanem/quran-database",
+                "upstream_commit_sha": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
+            },
+        },
+        "items": [
+            {
+                "reference": "1:5",
+                "surah_number": 1,
+                "ayah_number": 5,
+                "text": "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
+                "translation_text": "It is You we worship and You we ask for help.",
+                "page_number": 1,
+                "juz_number": 1,
+                "hizb_number": 1,
+                "sajda": False,
+                "surah": {
+                    "surah_number": 1,
+                    "arabic_name": "ٱلْفَاتِحَةِ",
+                    "english_name": "Al-Fatihah",
+                    "english_name_translation": "The Opening",
+                    "revelation_type": "meccan",
+                },
+                "source": {
+                    "source_name": "AbdullahGhanem/quran-database",
+                    "upstream_commit_sha": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
+                },
+                "translation_attribution": translation_attribution,
+            },
+            {
+                "reference": "1:6",
+                "surah_number": 1,
+                "ayah_number": 6,
+                "text": "ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ",
+                "translation_text": "Guide us to the straight path.",
+                "page_number": 1,
+                "juz_number": 1,
+                "hizb_number": 1,
+                "sajda": False,
+                "surah": {
+                    "surah_number": 1,
+                    "arabic_name": "ٱلْفَاتِحَةِ",
+                    "english_name": "Al-Fatihah",
+                    "english_name_translation": "The Opening",
+                    "revelation_type": "meccan",
+                },
+                "source": {
+                    "source_name": "AbdullahGhanem/quran-database",
+                    "upstream_commit_sha": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
+                },
+                "translation_attribution": translation_attribution,
+            },
+        ],
+    }
+    surah_two = {
+        "surah": {
+            "surah_number": 2,
+            "arabic_name": "ٱلْبَقَرَةِ",
+            "english_name": "Al-Baqarah",
+            "english_name_translation": "The Cow",
+            "revelation_type": "medinan",
+            "ayah_count": 2,
+            "source": {
+                "source_name": "AbdullahGhanem/quran-database",
+                "upstream_commit_sha": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
+            },
+        },
+        "items": [
+            {
+                "reference": "2:1",
+                "surah_number": 2,
+                "ayah_number": 1,
+                "text": "الٓمٓ",
+                "translation_text": "Alif, Lam, Meem.",
+                "page_number": 2,
+                "juz_number": 1,
+                "hizb_number": 1,
+                "sajda": False,
+                "surah": {
+                    "surah_number": 2,
+                    "arabic_name": "ٱلْبَقَرَةِ",
+                    "english_name": "Al-Baqarah",
+                    "english_name_translation": "The Cow",
+                    "revelation_type": "medinan",
+                },
+                "source": {
+                    "source_name": "AbdullahGhanem/quran-database",
+                    "upstream_commit_sha": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
+                },
+                "translation_attribution": translation_attribution,
+            },
+            {
+                "reference": "2:2",
+                "surah_number": 2,
+                "ayah_number": 2,
+                "text": "ذَٰلِكَ ٱلْكِتَٰبُ لَا رَيْبَ ۛ فِيهِ هُدًى لِّلْمُتَّقِينَ",
+                "translation_text": (
                     "This is the Book about which there is no doubt, a guidance "
                     "for those conscious of Allah."
                 ),
-                page_number=2,
-                juz_number=1,
-                hizb_number=1,
-                sajda=False,
-            ),
-        ),
-        translation_attribution=translation,
-    ).to_dict()
+                "page_number": 2,
+                "juz_number": 1,
+                "hizb_number": 1,
+                "sajda": False,
+                "surah": {
+                    "surah_number": 2,
+                    "arabic_name": "ٱلْبَقَرَةِ",
+                    "english_name": "Al-Baqarah",
+                    "english_name_translation": "The Cow",
+                    "revelation_type": "medinan",
+                },
+                "source": {
+                    "source_name": "AbdullahGhanem/quran-database",
+                    "upstream_commit_sha": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
+                },
+                "translation_attribution": translation_attribution,
+            },
+        ],
+    }
 
     def opener(request, timeout):
         requested_urls.append(request.full_url)
-        if request.full_url.endswith("/api/v1/surahs/1?translation=en.sahih"):
+        if request.full_url.endswith("/api/v1/surahs/1/ayahs?translation=en.sahih"):
             return StubResponse(surah_one)
-        if request.full_url.endswith("/api/v1/surahs/2?translation=en.sahih"):
+        if request.full_url.endswith("/api/v1/surahs/2/ayahs?translation=en.sahih"):
             return StubResponse(surah_two)
         raise AssertionError(f"Unexpected URL: {request.full_url}")
 
@@ -277,12 +368,101 @@ def test_remote_backend_builds_ayah_ranges_from_surah_endpoints() -> None:
     result = backend.get_range(_ref(1, 5), _ref(2, 2), translation_identifier="en.sahih")
 
     assert requested_urls == [
-        "https://api.example.test/api/v1/surahs/1?translation=en.sahih",
-        "https://api.example.test/api/v1/surahs/2?translation=en.sahih",
+        "https://api.example.test/api/v1/surahs/1/ayahs?translation=en.sahih",
+        "https://api.example.test/api/v1/surahs/2/ayahs?translation=en.sahih",
     ]
     assert result.start_reference == "1:5"
     assert result.end_reference == "2:2"
     assert [ayah.reference for ayah in result.ayahs] == ["1:5", "1:6", "2:1", "2:2"]
+    assert result.translation_attribution is not None
+    assert result.translation_attribution.identifier == "en.sahih"
+
+
+def test_remote_backend_uses_live_lookup_browse_endpoints() -> None:
+    requested_urls: list[str] = []
+    translation_attribution = {
+        "upstream_identifier": "en.sahih",
+        "language_code": "en",
+        "translation_name": "Sahih",
+        "english_name": "Saheeh International",
+        "edition_type": "translation",
+        "format": "text",
+    }
+    ayah_payload = {
+        "reference": "2:2",
+        "ayah_number": 2,
+        "text": "ذَٰلِكَ ٱلْكِتَٰبُ",
+        "translation_text": "That is the Book",
+        "page_number": 2,
+        "juz_number": 1,
+        "hizb_number": 1,
+        "sajda": True,
+        "surah": {
+            "surah_number": 2,
+            "arabic_name": "سورة البقرة",
+            "english_name": "Al-Baqara",
+            "english_name_translation": "The Cow",
+            "revelation_type": "medinan",
+        },
+        "source": {
+            "source_name": "AbdullahGhanem/quran-database",
+            "upstream_commit_sha": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
+        },
+        "translation_attribution": translation_attribution,
+    }
+    juz_payload = {
+        "juz_number": 1,
+        "items": [ayah_payload],
+        "pagination": {"total": 1, "limit": 50, "offset": 0, "has_more": False},
+    }
+    random_payload = {
+        "reference": "1:1",
+        "ayah_number": 1,
+        "text": "﻿بِسْمِ ٱللَّهِ",
+        "page_number": 1,
+        "juz_number": 1,
+        "hizb_number": 1,
+        "sajda": False,
+        "surah": {
+            "surah_number": 1,
+            "arabic_name": "سورة الفاتحة",
+            "english_name": "Al-Faatiha",
+            "english_name_translation": "The Opening",
+            "revelation_type": "meccan",
+        },
+        "source": {
+            "source_name": "AbdullahGhanem/quran-database",
+            "upstream_commit_sha": "f6c4c805f22b0432677d79aafc12139b915e1a0d",
+        },
+    }
+
+    def opener(request, timeout):
+        requested_urls.append(request.full_url)
+        if request.full_url.endswith("/api/v1/ayahs/2:2?translation=en.sahih"):
+            return StubResponse(ayah_payload)
+        if request.full_url.endswith("/api/v1/juz/1?translation=en.sahih"):
+            return StubResponse(juz_payload)
+        if request.full_url.endswith("/api/v1/ayahs/random"):
+            return StubResponse(random_payload)
+        raise AssertionError(f"Unexpected URL: {request.full_url}")
+
+    backend = RemoteBackend("https://api.example.test", opener=opener)
+
+    ayah = backend.get_ayah(_ref(2, 2), translation_identifier="en.sahih")
+    juz = backend.get_juz(1, translation_identifier="en.sahih")
+    random = backend.get_random_ayah(translation_identifier=None)
+
+    assert requested_urls == [
+        "https://api.example.test/api/v1/ayahs/2:2?translation=en.sahih",
+        "https://api.example.test/api/v1/juz/1?translation=en.sahih",
+        "https://api.example.test/api/v1/ayahs/random",
+    ]
+    assert ayah.ayah.reference == "2:2"
+    assert ayah.translation_attribution is not None
+    assert ayah.translation_attribution.identifier == "en.sahih"
+    assert juz.start_reference == "2:2"
+    assert juz.end_reference == "2:2"
+    assert random.selection_kind == "random"
 
 
 def _ref(surah_number: int, ayah_number: int):

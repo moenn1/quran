@@ -75,6 +75,7 @@ Current database-backed endpoints:
 - Surah list pagination defaults to `limit=114` and `offset=0`.
 - Ayah collection endpoints default to `limit=50` and `offset=0`, with a maximum `limit=200`.
 - Quran browse responses include source attribution fields from the locked upstream release metadata.
+- Ayah-returning browse endpoints accept an optional `translation` query such as `en.sahih`. When present, ayah payloads include `translation_text` plus `translation_attribution` for the selected text translation edition.
 - The browse API returns stored Quran text exactly as loaded from source. If the source row contains a BOM artifact, that byte-order mark remains present in the returned text.
 
 ## Ayah References

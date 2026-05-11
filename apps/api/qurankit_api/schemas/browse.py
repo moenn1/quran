@@ -23,6 +23,22 @@ class SourceAttribution(BaseModel):
     retrieved_artifact_sha256: str
 
 
+class TranslationAttribution(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    upstream_identifier: str
+    language_code: str
+    translation_name: str
+    english_name: str
+    format: str
+    edition_type: str
+    attribution_text: str | None = None
+    attribution_url: str | None = None
+    review_status: str
+    is_public: bool
+
+
 class AyahSurahSummary(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -54,6 +70,11 @@ class AyahResource(BaseModel):
     source: SourceAttribution
 
 
+class TranslatedAyahResource(AyahResource):
+    translation_text: str | None = None
+    translation_attribution: TranslationAttribution | None = None
+
+
 class SurahListResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -65,7 +86,7 @@ class SurahAyahListResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     surah: SurahResource
-    items: list[AyahResource]
+    items: list[TranslatedAyahResource]
     pagination: PaginationMeta
 
 
@@ -73,7 +94,7 @@ class JuzAyahListResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     juz_number: int
-    items: list[AyahResource]
+    items: list[TranslatedAyahResource]
     pagination: PaginationMeta
 
 
@@ -81,7 +102,7 @@ class HizbAyahListResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     hizb_number: int
-    items: list[AyahResource]
+    items: list[TranslatedAyahResource]
     pagination: PaginationMeta
 
 
@@ -89,5 +110,5 @@ class PageAyahListResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     page_number: int
-    items: list[AyahResource]
+    items: list[TranslatedAyahResource]
     pagination: PaginationMeta

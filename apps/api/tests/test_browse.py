@@ -93,6 +93,40 @@ def test_list_surah_ayahs_preserves_exact_source_text(
     assert payload["items"][0]["text"].startswith("\ufeff")
 
 
+def test_browse_lookup_endpoints_support_translation_text_and_attribution(
+    browse_client: TestClient,
+) -> None:
+    surah_response = browse_client.get("/api/v1/surahs/1/ayahs?translation=en.sahih")
+
+    assert surah_response.status_code == 200
+    surah_payload = surah_response.json()
+    assert surah_payload["items"][0]["translation_text"] == "In the name of Allah"
+    assert surah_payload["items"][0]["translation_attribution"] == {
+        "id": surah_payload["items"][0]["translation_attribution"]["id"],
+        "upstream_identifier": "en.sahih",
+        "language_code": "en",
+        "translation_name": "Sahih",
+        "english_name": "Saheeh International",
+        "format": "text",
+        "edition_type": "translation",
+        "attribution_text": (
+            "Imported into QuranKit from AbdullahGhanem/quran-database "
+            "(f6c4c805f22b0432677d79aafc12139b915e1a0d) using upstream edition "
+            "`en.sahih`."
+        ),
+        "attribution_url": "https://github.com/AbdullahGhanem/quran-database",
+        "review_status": "pending_review",
+        "is_public": False,
+    }
+
+    ayah_response = browse_client.get("/api/v1/ayahs/2:2?translation=en.sahih")
+
+    assert ayah_response.status_code == 200
+    ayah_payload = ayah_response.json()
+    assert ayah_payload["translation_text"] == "That is the Book"
+    assert ayah_payload["translation_attribution"]["upstream_identifier"] == "en.sahih"
+
+
 def test_read_ayah_supports_global_and_surah_local_references(
     browse_client: TestClient,
 ) -> None:
@@ -105,6 +139,44 @@ def test_read_ayah_supports_global_and_surah_local_references(
     assert by_pair.status_code == 200
     assert by_pair.json()["global_ayah_number"] == 3
     assert by_pair.json()["sajda"] is True
+
+
+def test_read_ayah_translation_filter_rejects_unknown_and_unsupported_editions(
+    browse_client: TestClient,
+) -> None:
+    missing = browse_client.get(
+        "/api/v1/ayahs/2:2?translation=en.unknown",
+        headers={"X-Request-ID": "ayah-translation-404"},
+    )
+
+    assert missing.status_code == 404
+    assert missing.json() == {
+        "error": {
+            "code": "translation_not_found",
+            "message": "Translation edition `en.unknown` was not found.",
+            "details": {"translation_identifier": "en.unknown"},
+        },
+        "meta": {"request_id": "ayah-translation-404"},
+    }
+
+    unsupported = browse_client.get(
+        "/api/v1/ayahs/2:2?translation=quran-simple",
+        headers={"X-Request-ID": "ayah-translation-422"},
+    )
+
+    assert unsupported.status_code == 422
+    assert unsupported.json() == {
+        "error": {
+            "code": "unsupported_translation_edition",
+            "message": "Browse translation must reference a text translation edition.",
+            "details": {
+                "translation_identifier": "quran-simple",
+                "edition_type": "quran",
+                "format": "text",
+            },
+        },
+        "meta": {"request_id": "ayah-translation-422"},
+    }
 
 
 def test_read_ayah_rejects_invalid_and_missing_references(

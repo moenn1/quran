@@ -67,8 +67,18 @@ class ArabicSourceAttribution:
             return cls()
 
         return cls(
-            repository=str(payload.get("repository", ARABIC_SOURCE_REPOSITORY)),
-            snapshot=str(payload.get("snapshot", ARABIC_SOURCE_SNAPSHOT)),
+            repository=str(
+                payload.get(
+                    "repository",
+                    payload.get("source_name", ARABIC_SOURCE_REPOSITORY),
+                )
+            ),
+            snapshot=str(
+                payload.get(
+                    "snapshot",
+                    payload.get("upstream_commit_sha", ARABIC_SOURCE_SNAPSHOT),
+                )
+            ),
             note=str(payload.get("note", ARABIC_SOURCE_NOTE)),
         )
 
@@ -110,14 +120,18 @@ class TranslationAttribution:
         if payload is None:
             return None
 
-        identifier = payload.get("identifier")
+        identifier = payload.get("identifier", payload.get("upstream_identifier"))
         if identifier is None:
             return None
 
         return cls(
             identifier=str(identifier),
-            language=_optional_string(payload.get("language")),
-            name=_optional_string(payload.get("name")),
+            language=_optional_string(
+                payload.get("language", payload.get("language_code"))
+            ),
+            name=_optional_string(
+                payload.get("name", payload.get("translation_name"))
+            ),
             english_name=_optional_string(
                 payload.get("english_name", payload.get("englishName"))
             ),
@@ -176,23 +190,45 @@ class AyahRecord:
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> AyahRecord:
+        surah_payload = _mapping_value(payload, "surah") or {}
+
         return cls(
-            surah_number=int(payload["surah_number"]),
+            surah_number=int(
+                payload.get("surah_number", surah_payload.get("surah_number"))
+            ),
             ayah_number=int(payload["ayah_number"]),
             surah_name_arabic=str(
-                payload.get("surah_name_arabic", payload.get("surah_name_ar", ""))
+                payload.get(
+                    "surah_name_arabic",
+                    payload.get(
+                        "surah_name_ar",
+                        surah_payload.get("arabic_name", ""),
+                    ),
+                )
             ),
             surah_name_english=str(
-                payload.get("surah_name_english", payload.get("surah_name_en", ""))
+                payload.get(
+                    "surah_name_english",
+                    payload.get(
+                        "surah_name_en",
+                        surah_payload.get("english_name", ""),
+                    ),
+                )
             ),
             surah_name_translation=_optional_string(
                 payload.get(
                     "surah_name_translation",
-                    payload.get("surah_name_en_translation"),
+                    payload.get(
+                        "surah_name_en_translation",
+                        surah_payload.get("english_name_translation"),
+                    ),
                 )
             ),
             revelation_type=_optional_string(
-                payload.get("revelation_type", payload.get("type"))
+                payload.get(
+                    "revelation_type",
+                    payload.get("type", surah_payload.get("revelation_type")),
+                )
             ),
             arabic_text=str(payload.get("arabic_text", payload.get("text", ""))),
             translation_text=_optional_string(
@@ -234,14 +270,13 @@ class AyahSelection:
         return cls(
             ayah=AyahRecord.from_dict(ayah_payload),
             arabic_source=ArabicSourceAttribution.from_dict(
-                _unwrap_mapping(payload, "arabic_source")
-                if isinstance(payload.get("arabic_source"), Mapping)
-                else None
+                _mapping_value(payload, "arabic_source")
+                or _mapping_value(payload, "source")
+                or _mapping_value(ayah_payload, "source")
             ),
             translation_attribution=TranslationAttribution.from_dict(
-                _unwrap_mapping(payload, "translation_attribution")
-                if isinstance(payload.get("translation_attribution"), Mapping)
-                else None
+                _mapping_value(payload, "translation_attribution")
+                or _mapping_value(ayah_payload, "translation_attribution")
             ),
             selection_kind=str(payload.get("selection_kind", "ayah")),
         )
@@ -326,17 +361,51 @@ class SurahResult:
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> SurahResult:
         surah_payload = _unwrap_mapping(payload, "surah")
+        item_payloads = (
+            surah_payload.get("ayahs")
+            if isinstance(surah_payload.get("ayahs"), list)
+            else payload.get("items", [])
+        )
+        translation_payload = _mapping_value(payload, "translation_attribution")
+        if translation_payload is None:
+            for item in item_payloads:
+                if isinstance(item, Mapping):
+                    translation_payload = _mapping_value(item, "translation_attribution")
+                    if translation_payload is not None:
+                        break
+
+        arabic_source_payload = (
+            _mapping_value(payload, "arabic_source")
+            or _mapping_value(surah_payload, "source")
+        )
+        if arabic_source_payload is None:
+            for item in item_payloads:
+                if isinstance(item, Mapping):
+                    arabic_source_payload = _mapping_value(item, "source")
+                    if arabic_source_payload is not None:
+                        break
+
         return cls(
             surah_number=int(surah_payload["surah_number"]),
             name_arabic=str(
-                surah_payload.get("name_arabic", surah_payload.get("name_ar", ""))
+                surah_payload.get(
+                    "name_arabic",
+                    surah_payload.get("name_ar", surah_payload.get("arabic_name", "")),
+                )
             ),
             name_english=str(
-                surah_payload.get("name_english", surah_payload.get("name_en", ""))
+                surah_payload.get(
+                    "name_english",
+                    surah_payload.get("name_en", surah_payload.get("english_name", "")),
+                )
             ),
             name_translation=_optional_string(
                 surah_payload.get(
-                    "name_translation", surah_payload.get("name_en_translation")
+                    "name_translation",
+                    surah_payload.get(
+                        "name_en_translation",
+                        surah_payload.get("english_name_translation"),
+                    ),
                 )
             ),
             revelation_type=_optional_string(
@@ -344,18 +413,14 @@ class SurahResult:
             ),
             ayahs=tuple(
                 AyahRecord.from_dict(item)
-                for item in surah_payload.get("ayahs", [])
+                for item in item_payloads
                 if isinstance(item, Mapping)
             ),
             arabic_source=ArabicSourceAttribution.from_dict(
-                _unwrap_mapping(payload, "arabic_source")
-                if isinstance(payload.get("arabic_source"), Mapping)
-                else None
+                arabic_source_payload
             ),
             translation_attribution=TranslationAttribution.from_dict(
-                _unwrap_mapping(payload, "translation_attribution")
-                if isinstance(payload.get("translation_attribution"), Mapping)
-                else None
+                translation_payload
             ),
         )
 
@@ -389,24 +454,52 @@ class JuzResult:
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> JuzResult:
         juz_payload = _unwrap_mapping(payload, "juz")
+        item_payloads = (
+            juz_payload.get("ayahs")
+            if isinstance(juz_payload.get("ayahs"), list)
+            else payload.get("items", [])
+        )
+        ayahs = tuple(
+            AyahRecord.from_dict(item)
+            for item in item_payloads
+            if isinstance(item, Mapping)
+        )
+        translation_payload = _mapping_value(payload, "translation_attribution")
+        if translation_payload is None:
+            for item in item_payloads:
+                if isinstance(item, Mapping):
+                    translation_payload = _mapping_value(item, "translation_attribution")
+                    if translation_payload is not None:
+                        break
+
+        arabic_source_payload = _mapping_value(payload, "arabic_source")
+        if arabic_source_payload is None:
+            for item in item_payloads:
+                if isinstance(item, Mapping):
+                    arabic_source_payload = _mapping_value(item, "source")
+                    if arabic_source_payload is not None:
+                        break
+
         return cls(
             juz_number=int(juz_payload["juz_number"]),
-            start_reference=str(juz_payload["start_reference"]),
-            end_reference=str(juz_payload["end_reference"]),
-            ayahs=tuple(
-                AyahRecord.from_dict(item)
-                for item in juz_payload.get("ayahs", [])
-                if isinstance(item, Mapping)
+            start_reference=str(
+                juz_payload.get(
+                    "start_reference",
+                    ayahs[0].reference if ayahs else "",
+                )
             ),
+            end_reference=str(
+                juz_payload.get(
+                    "end_reference",
+                    ayahs[-1].reference if ayahs else "",
+                )
+            ),
+            ayahs=ayahs,
             arabic_source=ArabicSourceAttribution.from_dict(
-                _unwrap_mapping(payload, "arabic_source")
-                if isinstance(payload.get("arabic_source"), Mapping)
-                else None
+                arabic_source_payload
             ),
             translation_attribution=TranslationAttribution.from_dict(
-                _unwrap_mapping(payload, "translation_attribution")
-                if isinstance(payload.get("translation_attribution"), Mapping)
-                else None
+                translation_payload
             ),
         )
 
@@ -600,7 +693,7 @@ class RemoteBackend:
         self, surah_number: int, translation_identifier: str | None
     ) -> SurahResult:
         payload = self._request_json(
-            f"/api/v1/surahs/{surah_number}",
+            f"/api/v1/surahs/{surah_number}/ayahs",
             {"translation": translation_identifier},
         )
         return SurahResult.from_dict(payload)
@@ -674,7 +767,7 @@ class RemoteBackend:
         self, juz_number: int, translation_identifier: str | None
     ) -> JuzResult:
         payload = self._request_json(
-            f"/api/v1/juzs/{juz_number}",
+            f"/api/v1/juz/{juz_number}",
             {"translation": translation_identifier},
         )
         return JuzResult.from_dict(payload)

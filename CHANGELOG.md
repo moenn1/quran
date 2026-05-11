@@ -38,6 +38,7 @@ The format is based on Keep a Changelog, and this project follows Semantic Versi
 
 ### Fixed
 
+- Aligned the CLI remote lookup flow with QuranKit's live `/api/v1/...` contract by teaching the browse API to return optional translation text and attribution on ayah lookup routes, then updating the CLI remote backend to use the current surah-ayah and juz endpoints and parse the live response shapes correctly.
 - Aligned GitHub Actions with QuranKit's checked-in release entrypoints by provisioning `apps/api[dev]`, restoring Playwright browser installation for the manual release workflow, and adding a workflow-parity guard in `./scripts/check-workflows.sh`.
 - Added a reproducible `./scripts/export-release-screenshots.sh` path and linked the new release assets from the README so release screenshots stay tied to approved Playwright visual baselines instead of ad hoc copies.
 - Clarified that the current Docker bootstrap API is only a health-and-safety surface, while the documented `/api/v1/...` routes remain a production contract for future API work and CLI remote mode.
